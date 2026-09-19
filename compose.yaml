@@ -1,0 +1,15 @@
+services:
+  floci-dash:
+    image: ghcr.io/ofsazib/floci-dash:latest-combined
+    privileged: true
+    ports:
+      - "4566:4566" # API do Floci
+      - "3000:3000" # Interface Web
+      - "7000-7010:7000-7010" # Bancos RDS
+    environment:
+      - FLOCI_STORAGE_MODE=hybrid # Gravação assíncrona em disco (suporta reboots)
+    volumes:
+      - floci-data:/app/data
+
+volumes:
+  floci-data:
