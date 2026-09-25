@@ -2,6 +2,7 @@ services:
   floci-dash:
     image: ghcr.io/ofsazib/floci-dash:latest-combined
     privileged: true
+    restart: unless-stopped
     ports:
       - "4566:4566" # API do Floci
       - "3000:3000" # Interface Web
