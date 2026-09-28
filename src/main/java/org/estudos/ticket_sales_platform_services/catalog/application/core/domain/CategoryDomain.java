@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class Category {
+public class CategoryDomain {
 
     private Long id;
     private String name;

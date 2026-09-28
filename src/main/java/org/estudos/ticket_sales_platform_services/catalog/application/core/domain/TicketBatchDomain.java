@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-public class TicketBatch {
+public class TicketBatchDomain {
 
     private UUID id;
     private UUID eventId;

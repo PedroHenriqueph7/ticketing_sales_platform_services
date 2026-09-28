@@ -2,13 +2,18 @@ services:
   floci-dash:
     image: ghcr.io/ofsazib/floci-dash:latest-combined
     privileged: true
-    restart: unless-stopped
+    restart: on-failure:5
     ports:
       - "4566:4566" # API do Floci
       - "3000:3000" # Interface Web
       - "7000-7010:7000-7010" # Bancos RDS
     environment:
       - FLOCI_STORAGE_MODE=hybrid # Gravação assíncrona em disco (suporta reboots)
+    # Remove pid/socket órfãos do dockerd interno (Docker-in-Docker) antes de iniciar,
+    # evitando o erro "process with PID X is still running" após crash/restart abrupto.
+    entrypoint: >
+      sh -c "rm -f /var/run/docker.pid /var/run/docker.sock;
+             exec tini -- /usr/local/bin/combined-entrypoint.sh"
     volumes:
       - floci-data:/app/data
 

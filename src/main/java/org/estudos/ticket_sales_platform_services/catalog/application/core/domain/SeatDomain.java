@@ -4,7 +4,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.domai
 
 import java.util.UUID;
 
-public class Seat {
+public class SeatDomain {
 
     private UUID id;
     private UUID ticketBatchId;
