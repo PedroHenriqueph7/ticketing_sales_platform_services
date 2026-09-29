@@ -1,5 +1,4 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -9,19 +8,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.RegisterEventRequestDTO;
+import org.estudos.ticket_sales_platform_services.platform.adapter.in.dtos.ProblemResponse;
 import org.springframework.http.ResponseEntity;
-
 import java.util.Map;
 import java.util.UUID;
-
-
 @Tag(name = "Events", description = "Operações relacionadas ao cadastro e gerenciamento de eventos")
 public interface CreateEventControllerDocs {
-
     @Operation(
             summary = "Cadastrar um novo evento",
             description = "Cria um novo evento em status DRAFT, vinculado a um produtor e a uma categoria. " +
-                    "As datas de início e fim são validadas (startsAt deve ser futuro e endsAt posterior a startsAt)."
+                    "As datas de início e fim são validadas (startsAt deve ser futuro e endsAt posterior a startsAt). " +
+                    "Em caso de erro, o campo type identifica o problema. O formato está no schema Problem."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -38,15 +35,19 @@ public interface CreateEventControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Requisição inválida (campos obrigatórios ausentes ou datas inválidas)",
-                    content = @Content(mediaType = "application/json")
+                    description = "Requisição inválida. type=https://api.suaplataforma.com/errors/invalid-data ou invalid-date",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Categoria ou produtor inexistente. type=https://api.suaplataforma.com/errors/category-not-found ou producer-not-found",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Erro interno inesperado ao processar a requisição",
-                    content = @Content(mediaType = "application/json")
+                    description = "Erro interno. type=https://api.suaplataforma.com/errors/internal-error",
+                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
             )
     })
     ResponseEntity<Map<String, UUID>> createEvent(@Valid RegisterEventRequestDTO eventRequestDTO);
 }
-

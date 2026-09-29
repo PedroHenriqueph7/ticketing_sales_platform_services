@@ -31,10 +31,10 @@ public class CreateEventUseCase implements CreateEventInPort {
     @Override
     public UUID execute(EventDomain event) {
 
+        ValidationObject.validateInputObject(event,"event");
+
         log.info("Iniciando caso de uso de cadastro de evento: categoryId={}, producerId={}",
                 event.getCategoryId(), event.getProducerId());
-
-        ValidationObject.validateInputObject(event,"event");
         log.debug("Validação de objeto de entrada do evento concluída com sucesso");
 
         if(!findByCategoryIDOutPort.existsByCategoryId(event.getCategoryId())) {

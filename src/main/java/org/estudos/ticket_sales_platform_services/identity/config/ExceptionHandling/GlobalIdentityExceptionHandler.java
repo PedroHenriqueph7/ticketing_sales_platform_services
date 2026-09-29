@@ -1,66 +1,56 @@
 package org.estudos.ticket_sales_platform_services.identity.config.ExceptionHandling;
-
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
+import org.estudos.ticket_sales_platform_services.platform.problem.ProblemTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "org.estudos.ticket_sales_platform_services.identity")
 public class GlobalIdentityExceptionHandler {
-
     private static final Logger log = LoggerFactory.getLogger(GlobalIdentityExceptionHandler.class);
-
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail handleUserNotFoundException(UserNotFoundException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problemDetail.setTitle("Violação de Regra de Negócio");
-        problemDetail.setType(URI.create("https://api.suaplataforma.com/errors/business-rule"));
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        return problem(HttpStatus.NOT_FOUND, "Violação de Regra de Negócio", ex.getMessage(), ProblemTypes.USER_NOT_FOUND);
     }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationException(MethodArgumentNotValidException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Erro de validação nos dados enviados.");
-        problemDetail.setTitle("Dados Inválidos");
-        problemDetail.setType(URI.create("https://api.suaplataforma.com/errors/invalid-data"));
-
-        // Mapeia a lista de erros para um dicionário: {"campo": "mensagem de erro"}
+        ProblemDetail problemDetail = problem(
+                HttpStatus.BAD_REQUEST,
+                "Dados Inválidos",
+                "Erro de validação nos dados enviados.",
+                ProblemTypes.INVALID_DATA
+        );
         Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(
                         FieldError::getField,
                         fieldError -> fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "Valor inválido",
-                        (mensagemExistente, novaMensagem) -> mensagemExistente // Evita colisão se houver múltiplas anotações quebrando no mesmo campo
+                        (mensagemExistente, novaMensagem) -> mensagemExistente
                 ));
-
         problemDetail.setProperty("invalid_params", fieldErrors);
-        problemDetail.setProperty("timestamp", Instant.now());
-
         return problemDetail;
     }
-
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUncaughtException(Exception ex) {
-        // Obrigatório: Logar a stack trace completa internamente para o time de observabilidade
         log.error("Erro interno não tratado: ", ex);
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado. Tente novamente mais tarde.");
-        problemDetail.setTitle("Erro Interno do Servidor");
-        problemDetail.setType(URI.create("https://api.suaplataforma.com/errors/internal-error"));
+        return problem(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Erro Interno do Servidor",
+                "Ocorreu um erro interno inesperado. Tente novamente mais tarde.",
+                ProblemTypes.INTERNAL_ERROR
+        );
+    }
+    private static ProblemDetail problem(HttpStatus status, String title, String detail, String type) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setTitle(title);
+        problemDetail.setType(ProblemTypes.uri(type));
         problemDetail.setProperty("timestamp", Instant.now());
-
         return problemDetail;
     }
 }
-
