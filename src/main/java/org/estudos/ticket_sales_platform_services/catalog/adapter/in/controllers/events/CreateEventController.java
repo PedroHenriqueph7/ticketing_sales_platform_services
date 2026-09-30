@@ -1,8 +1,8 @@
-package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
+package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events;
 
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateEventControllerDocs;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.RegisterEventRequestDTO;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.slf4j.Logger;

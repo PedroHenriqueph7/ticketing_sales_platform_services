@@ -1,6 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.dependencyInjection;
 
-import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.CreateEventUseCase;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateEventUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CheckProducerExistsOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByCategoryIDOutPort;

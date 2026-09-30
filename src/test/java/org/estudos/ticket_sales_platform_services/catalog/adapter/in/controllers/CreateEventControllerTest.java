@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.CreateEventController;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;

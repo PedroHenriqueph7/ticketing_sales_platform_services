@@ -1,4 +1,4 @@
-package org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos;
+package org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

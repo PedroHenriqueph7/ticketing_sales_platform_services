@@ -1,8 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers;
 
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.RegisterEventRequestDTO;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
 public final class EventMapper {

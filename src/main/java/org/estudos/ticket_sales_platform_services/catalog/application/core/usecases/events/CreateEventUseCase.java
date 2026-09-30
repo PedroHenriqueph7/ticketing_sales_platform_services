@@ -1,4 +1,4 @@
-package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases;
+package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;

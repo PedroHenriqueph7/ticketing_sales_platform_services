@@ -7,8 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.RegisterEventRequestDTO;
-import org.estudos.ticket_sales_platform_services.platform.adapter.in.dtos.ProblemResponse;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
 import java.util.UUID;
@@ -35,18 +34,18 @@ public interface CreateEventControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Requisição inválida. type=https://api.suaplataforma.com/errors/invalid-data ou invalid-date",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
+                    description = "Requisição inválida",
+                    content = @Content(mediaType = "application/problem+json")
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Categoria ou produtor inexistente. type=https://api.suaplataforma.com/errors/category-not-found ou producer-not-found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
+                    description = "Categoria ou produtor inexistente.",
+                    content = @Content(mediaType = "application/problem+json")
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Erro interno. type=https://api.suaplataforma.com/errors/internal-error",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemResponse.class))
+                    description = "Erro interno.",
+                    content = @Content(mediaType = "application/problem+json")
             )
     })
     ResponseEntity<Map<String, UUID>> createEvent(@Valid RegisterEventRequestDTO eventRequestDTO);
