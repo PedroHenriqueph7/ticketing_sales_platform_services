@@ -8,9 +8,11 @@
 		<version>4.0.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>org.estudos</groupId>
 	<artifactId>ticket_sales_platform_services</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<name/>
 	<description/>
 	<url/>
@@ -29,7 +31,9 @@
 	<properties>
 		<java.version>25</java.version>
 		<spring-modulith.version>2.0.4</spring-modulith.version>
+		<spring-cloud-aws.version>4.0.2</spring-cloud-aws.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,6 +92,10 @@
 			<artifactId>spring-boot-starter-flyway-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.awspring.cloud</groupId>
+			<artifactId>spring-cloud-aws-starter-sqs</artifactId>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.springframework.boot</groupId>-->
 <!--			<artifactId>spring-boot-starter-security-test</artifactId>-->
@@ -145,6 +153,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>io.awspring.cloud</groupId>
+				<artifactId>spring-cloud-aws-dependencies</artifactId>
+				<version>${spring-cloud-aws.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.modulith</groupId>
 				<artifactId>spring-modulith-bom</artifactId>

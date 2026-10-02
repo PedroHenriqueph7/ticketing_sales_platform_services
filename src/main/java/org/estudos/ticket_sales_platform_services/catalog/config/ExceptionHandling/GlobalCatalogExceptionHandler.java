@@ -1,10 +1,13 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -12,12 +15,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 @RestControllerAdvice(basePackages = "org.estudos.ticket_sales_platform_services.catalog")
 public class GlobalCatalogExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalCatalogExceptionHandler.class);
+
+    private final ApplicationEventPublisher eventPublisher;
+
+    public GlobalCatalogExceptionHandler(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     @ExceptionHandler(CategoryNotFoundException.class)
     public ProblemDetail handleCategoryNotFoundException(CategoryNotFoundException ex) {
@@ -86,6 +96,20 @@ public class GlobalCatalogExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUncaughtException(Exception ex) {
 
+        String correlationId = MDC.get("correlationId");
+
+        ExecutionLogEvent logEvent = new ExecutionLogEvent(
+                correlationId != null ? correlationId : "uncknown",
+                "catalog",
+                "ERROR",
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                getStackTraceAsString(ex),
+                OffsetDateTime.now()
+        );
+
+        eventPublisher.publishEvent(logEvent);
+
         log.error("Erro interno não tratado: ", ex);
         return problem(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -93,6 +117,8 @@ public class GlobalCatalogExceptionHandler {
                 "Ocorreu um erro interno inesperado. Tente novamente mais tarde."
         );
     }
+
+    private String getStackTraceAsString(Exception exception) { return exception.toString();}
 
     private static ProblemDetail problem(HttpStatus status, String title, String detail) {
 

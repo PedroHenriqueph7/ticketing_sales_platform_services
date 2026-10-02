@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.CreateEventController;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,16 +33,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CreateEventControllerTest {
     @Mock
     private CreateEventInPort createEventInPort;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     private MockMvc mockMvc;
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+
         validator.afterPropertiesSet();
         mockMvc = MockMvcBuilders.standaloneSetup(new CreateEventController(createEventInPort))
-                .setControllerAdvice(new GlobalCatalogExceptionHandler())
+                .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
                 .build();
     }
+
     @Test
     void createEventReturnsCreatedWithLocation() throws Exception {
         UUID eventId = UUID.randomUUID();
@@ -79,8 +85,9 @@ class CreateEventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload(true).replace("2099-01-10T20:00:00-03:00", "2000-01-01T00:00:00Z")))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.title").value("Violação de Regra de Negócio"));
+                .andExpect(jsonPath("$.title").value("Violação de Regra de Negócio - Data inválida"));
         verify(createEventInPort, never()).execute(any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
     @Test
     void createEventReturnsNotFoundWhenCategoryDoesNotExist() throws Exception {
@@ -109,6 +116,7 @@ class CreateEventControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.detail").value("Ocorreu um erro interno inesperado. Tente novamente mais tarde."))
                 .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.not(containsString("segredo-interno"))));
+        verify(eventPublisher).publishEvent(any(ExecutionLogEvent.class));
     }
     private static String payload(boolean includeNeighborhood) {
         String neighborhood = includeNeighborhood ? ",\"addressNeighborhood\":\"Centro\"" : "";
