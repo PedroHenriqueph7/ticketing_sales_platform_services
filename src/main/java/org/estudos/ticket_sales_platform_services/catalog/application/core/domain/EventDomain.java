@@ -9,7 +9,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor()
 @Getter
 public class EventDomain {
 
@@ -48,5 +48,9 @@ public class EventDomain {
         if (endsAt == null || !endsAt.isAfter(startsAt)) {
             throw new InvalidDateException("endsAt não pode ser anterior a startsAt");
         }
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
     }
 }

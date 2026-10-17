@@ -4,6 +4,7 @@ import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -13,11 +14,12 @@ public class ExecutionLogEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(ExecutionLogEventListener.class);
     private final SqsTemplate sqsTemplate;
-    private final String queueName = "execution-logs-queue";
+    private final String queueName;
 
 
-    public ExecutionLogEventListener(SqsTemplate sqsTemplate) {
+    public ExecutionLogEventListener(SqsTemplate sqsTemplate, @Value("${aws.sqs.queue.name}") String queueName) {
         this.sqsTemplate = sqsTemplate;
+        this.queueName = queueName;
     }
 
     @Async("logTaskExecutor")
@@ -26,7 +28,7 @@ public class ExecutionLogEventListener {
 
         try {
             sqsTemplate.send(queueName, event);
-            log.info("Envio dos Logs de Erro com sucesso para a fila: ", queueName);
+            log.info("Envio dos Logs de Erro com sucesso para a fila: {}", queueName);
 
         } catch (Exception e) {
             log.error("Falha ao enviar log para SQS. CorrelationId: {}", event.correlationId(), e);

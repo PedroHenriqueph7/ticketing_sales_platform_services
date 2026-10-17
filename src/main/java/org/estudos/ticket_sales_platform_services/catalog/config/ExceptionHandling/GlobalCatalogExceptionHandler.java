@@ -1,6 +1,8 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions.StorageIntegrationException;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
@@ -40,6 +42,17 @@ public class GlobalCatalogExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EventNotFoundException.class)
+    public ProblemDetail handleEventNotFoundException(EventNotFoundException ex) {
+        log.warn("Regra de negócio violada - evento não encontrado: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.NOT_FOUND,
+                "Evento não encontrado",
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(InputObjectInvalidException.class)
     public ProblemDetail handleInputObjectInvalidException(InputObjectInvalidException ex) {
         log.warn("Regra de negócio violada - objeto de entrada inválido: {}", ex.getMessage());
@@ -72,6 +85,16 @@ public class GlobalCatalogExceptionHandler {
                 ex.getMessage());
     }
 
+    @ExceptionHandler(StorageIntegrationException.class)
+    public ProblemDetail handleStorageIntegrationException(StorageIntegrationException ex) {
+        log.warn("Fluxo de Integração com S3 falhou: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Integração com S3 falhou",
+                ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationException(MethodArgumentNotValidException ex) {
         log.warn("Erro de validação nos dados enviados: {} erro(s) de campo", ex.getBindingResult().getFieldErrorCount());
@@ -99,13 +122,13 @@ public class GlobalCatalogExceptionHandler {
         String correlationId = MDC.get("correlationId");
 
         ExecutionLogEvent logEvent = new ExecutionLogEvent(
+                OffsetDateTime.now(),
                 correlationId != null ? correlationId : "uncknown",
                 "catalog",
                 "ERROR",
                 ex.getClass().getSimpleName(),
                 ex.getMessage(),
-                getStackTraceAsString(ex),
-                OffsetDateTime.now()
+                getStackTraceAsString(ex)
         );
 
         eventPublisher.publishEvent(logEvent);

@@ -5,28 +5,32 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/v1/events")
-public class CreateEventController implements CreateEventControllerDocs {
+public class EventController implements CreateEventControllerDocs {
 
-    private static final Logger log = LoggerFactory.getLogger(CreateEventController.class);
+    private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
     private final CreateEventInPort createEventInPort;
+    private final UploadCoverImageInPort uploadCoverImageInPort;
 
-    public CreateEventController(CreateEventInPort createEventInPort) {
+    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort) {
         this.createEventInPort = createEventInPort;
+        this.uploadCoverImageInPort = uploadCoverImageInPort;
     }
 
     @Override
@@ -42,4 +46,24 @@ public class CreateEventController implements CreateEventControllerDocs {
 
         return ResponseEntity.created(location).body(Map.of("id", eventId));
     }
+
+
+    @PatchMapping(value = "/{eventId}/cover-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> uploadImageCover(@PathVariable UUID eventId, @RequestParam("file")MultipartFile file) throws IOException {
+
+        if (file.isEmpty()){ return ResponseEntity.badRequest().build(); }
+
+        try (InputStream fileStream = file.getInputStream()) {
+            uploadCoverImageInPort.uploadFile(
+                    eventId,
+                    file.getOriginalFilename(),
+                    fileStream,
+                    file.getContentType(),
+                    file.getSize()
+            );
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

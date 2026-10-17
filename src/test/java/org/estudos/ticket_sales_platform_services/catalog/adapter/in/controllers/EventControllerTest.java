@@ -1,6 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.CreateEventController;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.EventController;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @ExtendWith(MockitoExtension.class)
-class CreateEventControllerTest {
+class EventControllerTest {
     @Mock
     private CreateEventInPort createEventInPort;
     @Mock
@@ -41,7 +41,7 @@ class CreateEventControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(new CreateEventController(createEventInPort))
+        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort))
                 .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
                 .build();

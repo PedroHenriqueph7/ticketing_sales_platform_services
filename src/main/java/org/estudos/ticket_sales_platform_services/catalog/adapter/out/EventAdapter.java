@@ -6,16 +6,19 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistenc
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.CategoryRepository;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.EventRepository;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByEventIdOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.RegisterEventOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveEventOutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class EventAdapter implements RegisterEventOutPort {
+public class EventAdapter implements RegisterEventOutPort, FindByEventIdOutPort, SaveEventOutPort {
 
     private static final Logger log = LoggerFactory.getLogger(EventAdapter.class);
 
@@ -32,7 +35,7 @@ public class EventAdapter implements RegisterEventOutPort {
     public UUID register(EventDomain eventDomain) {
 
         log.debug("Convertendo EventDomain para EventEntity: categoryId={}", eventDomain.getCategoryId());
-        EventEntity eventEntity = EventMapper.toEntity(eventDomain);
+        EventEntity eventEntity = EventMapper.toNewEntity(eventDomain);
 
         // getReferenceById NÃO dispara SELECT: cria um proxy do Hibernate
         // contendo apenas o ID, usado só para montar a FK na hora do INSERT/UPDATE.
@@ -44,5 +47,23 @@ public class EventAdapter implements RegisterEventOutPort {
         log.info("Evento persistido com sucesso no banco de dados: eventId={}", eventEntity.getId());
 
         return eventEntity.getId();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<EventDomain> findByEventId(UUID id) {
+
+        return repository.findById(id).map(EventMapper::toDomain);
+    }
+
+    @Transactional
+    @Override
+    public void save(EventDomain eventDomain) {
+
+        CategoryEntity categoryProxy = categoryRepository.getReferenceById(eventDomain.getCategoryId());
+
+        EventEntity entity = EventMapper.toExistingEntity(eventDomain, categoryProxy);
+
+        repository.save(entity);
     }
 }
