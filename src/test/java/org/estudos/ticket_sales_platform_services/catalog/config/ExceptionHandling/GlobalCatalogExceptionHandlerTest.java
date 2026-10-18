@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandl
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -64,6 +66,26 @@ class GlobalCatalogExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), input.getStatus());
         assertEquals("Violação de Regra de Negócio", input.getTitle());
         assertEquals("payload invalido", input.getDetail());
+        verify(eventPublisher, never()).publishEvent(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void mapsImageExtensionNotAllowedToBadRequest() {
+        ProblemDetail detail = handler.handleImageExtensionNotAllowedException(new ImageExtensionNotAllowedException());
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
+        assertEquals("Formato de imagem inválido", detail.getTitle());
+        assertEquals("Formato de imagem inválido. Formatos permitidos: JPG, PNG, WEBP.", detail.getDetail());
+        verify(eventPublisher, never()).publishEvent(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void mapsMissingMultipartPartToBadRequest() {
+        ProblemDetail detail = handler.handleMissingMultipartFile(new MissingServletRequestPartException("file"));
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
+        assertEquals("Parâmetro obrigatório ausente", detail.getTitle());
+        assertEquals("Required part 'file' is not present.", detail.getDetail());
         verify(eventPublisher, never()).publishEvent(org.mockito.ArgumentMatchers.any());
     }
 

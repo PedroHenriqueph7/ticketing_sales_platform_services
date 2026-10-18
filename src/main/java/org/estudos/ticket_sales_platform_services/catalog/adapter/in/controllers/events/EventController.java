@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controller
 
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateEventControllerDocs;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.UploadCoverImageControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/v1/events")
-public class EventController implements CreateEventControllerDocs {
+public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
@@ -48,6 +49,7 @@ public class EventController implements CreateEventControllerDocs {
     }
 
 
+    @Override
     @PatchMapping(value = "/{eventId}/cover-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadImageCover(@PathVariable UUID eventId, @RequestParam("file")MultipartFile file) throws IOException {
 

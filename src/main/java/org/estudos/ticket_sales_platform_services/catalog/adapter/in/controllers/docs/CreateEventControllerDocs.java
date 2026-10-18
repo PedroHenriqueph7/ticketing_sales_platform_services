@@ -11,8 +11,10 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
 import java.util.UUID;
+
 @Tag(name = "Events", description = "Operações relacionadas ao cadastro e gerenciamento de eventos")
 public interface CreateEventControllerDocs {
+
     @Operation(
             summary = "Cadastrar um novo evento",
             description = "Cria um novo evento em status DRAFT, vinculado a um produtor e a uma categoria. " +
@@ -49,4 +51,6 @@ public interface CreateEventControllerDocs {
             )
     })
     ResponseEntity<Map<String, UUID>> createEvent(@Valid RegisterEventRequestDTO eventRequestDTO);
+
+
 }

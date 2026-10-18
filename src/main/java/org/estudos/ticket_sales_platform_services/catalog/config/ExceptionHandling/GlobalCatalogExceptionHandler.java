@@ -3,6 +3,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
@@ -14,8 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -60,6 +64,28 @@ public class GlobalCatalogExceptionHandler {
         return problem(
                 HttpStatus.BAD_REQUEST,
                 "Violação de Regra de Negócio",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(ImageExtensionNotAllowedException.class)
+    public ProblemDetail handleImageExtensionNotAllowedException(ImageExtensionNotAllowedException ex) {
+        log.warn("Regra de negócio violada - formato de imagem inválido: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Formato de imagem inválido",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class, MultipartException.class})
+    public ProblemDetail handleMissingMultipartFile(Exception ex) {
+        log.warn("Parâmetro ou parte multipart obrigatória ausente: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro obrigatório ausente",
                 ex.getMessage()
         );
     }
