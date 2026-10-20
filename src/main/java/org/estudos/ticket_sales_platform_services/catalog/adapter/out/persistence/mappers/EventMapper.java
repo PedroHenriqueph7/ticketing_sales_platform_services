@@ -17,19 +17,19 @@ public final class EventMapper {
 
         return new EventEntity(
                 domain.getId(),
-                null,
                 domain.getProducerId(),
+                null,
                 domain.getTitle(),
                 domain.getDescription(),
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                null,
                 domain.getAddressZipcode(),
                 domain.getAddressStreet(),
                 domain.getAddressNumber(),
                 domain.getAddressCity(),
-                domain.getAddressNeighborhood()
+                domain.getAddressNeighborhood(),
+                null
         );
     }
 
@@ -41,19 +41,19 @@ public final class EventMapper {
 
         return new EventEntity(
                 domain.getId(),
-                categoryEntity,
                 domain.getProducerId(),
+                categoryEntity,
                 domain.getTitle(),
                 domain.getDescription(),
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                domain.getCoverImageUrl(),
                 domain.getAddressZipcode(),
                 domain.getAddressStreet(),
                 domain.getAddressNumber(),
                 domain.getAddressCity(),
-                domain.getAddressNeighborhood()
+                domain.getAddressNeighborhood(),
+                domain.getCoverImageUrl()
         );
     }
 
@@ -72,12 +72,12 @@ public final class EventMapper {
                 entity.getStatus(),
                 entity.getStartsAt(),
                 entity.getEndsAt(),
-                entity.getCoverImageUrl(),
                 entity.getAddressZipcode(),
                 entity.getAddressStreet(),
                 entity.getAddressNumber(),
                 entity.getAddressCity(),
-                entity.getAddressNeighborhood()
+                entity.getAddressNeighborhood(),
+                entity.getCoverImageUrl()
         );
     }
 }

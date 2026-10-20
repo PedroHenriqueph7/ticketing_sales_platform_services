@@ -18,6 +18,8 @@ target/
 *.iws
 *.iml
 *.ipr
+*.py
+*.sh
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,4 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
-.db/
+
+src\main\resources\db
+scripts/*
+scripts/rds

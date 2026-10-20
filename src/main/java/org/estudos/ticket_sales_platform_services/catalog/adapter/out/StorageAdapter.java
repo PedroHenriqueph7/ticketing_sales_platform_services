@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
@@ -27,16 +28,15 @@ public class StorageAdapter implements StorageOutPort {
     public String uploadFile(String fileName, InputStream inputStream, String contentType, long contentLength) {
 
         try {
-            byte[] bytes = inputStream.readAllBytes();
-
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(fileName)
                     .contentType(contentType)
-                    .contentLength((long) bytes.length)
+                    .contentLength(contentLength)
                     .build();
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
+            log.info("Upload Concluido com Sucesso no bucket S3");
 
             return s3Client.utilities()
                     .getUrl(b -> b.bucket(bucketName).key(fileName))
@@ -47,5 +47,35 @@ public class StorageAdapter implements StorageOutPort {
             throw new StorageIntegrationException("Falha ao realizar upload para o S3", e);
 
         }
+    }
+
+    @Override
+    public void deleteFile(String fileName) {
+
+        String key = extractKey(fileName);
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        try {
+            s3Client.deleteObject(deleteObjectRequest);
+            log.info("Arquivo excluído do S3 com sucesso: {}", key);
+
+        } catch (Exception e) {
+            log.error("Erro ao excluir arquivo no S3 (key={}): ", key, e);
+            throw new StorageIntegrationException("Falha ao excluir arquivo no S3", e);
+        }
+    }
+
+    private String extractKey(String fileKeyOrUrl) {
+
+        if (fileKeyOrUrl == null) return null;
+
+        if (fileKeyOrUrl.contains("coverImageEvent/")) {
+            return fileKeyOrUrl.substring(fileKeyOrUrl.indexOf("coverImageEvent/"));
+        }
+        return fileKeyOrUrl;
     }
 }

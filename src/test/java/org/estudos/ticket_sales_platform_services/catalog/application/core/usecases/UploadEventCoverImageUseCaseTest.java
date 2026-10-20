@@ -23,13 +23,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -174,5 +171,88 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         verify(saveEventOutPort, never()).save(any());
+    }
+
+    @Test
+    void uploadFileDeletesOldImageWhenEventAlreadyHadCoverImage() {
+        // Arrange
+        UUID eventId = UUID.randomUUID();
+        String fileName = "banner-new.png";
+        InputStream fileStream = new ByteArrayInputStream("image-content".getBytes());
+        String contentType = "image/png";
+        long size = 1024L;
+        String oldUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-old.png";
+        String newUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-new.png";
+
+        EventDomain eventDomain = EventRegistrationFixtures.validDraft();
+        eventDomain.setCoverImageUrl(oldUrl);
+
+        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
+
+        // Act
+        useCase.uploadFile(eventId, fileName, fileStream, contentType, size);
+
+        // Assert
+        assertEquals(newUrl, eventDomain.getCoverImageUrl());
+        verify(saveEventOutPort).save(eventDomain);
+        verify(storageOutPort).deleteFile(oldUrl);
+    }
+
+    @Test
+    void uploadFileCompensatesAndDeleteUploadedFileWhenDatabaseSaveFails() {
+        // Arrange
+        UUID eventId = UUID.randomUUID();
+        String fileName = "banner.png";
+        InputStream fileStream = new ByteArrayInputStream("image-content".getBytes());
+        String contentType = "image/png";
+        long size = 1024L;
+        String uploadedUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-test.png";
+
+        EventDomain eventDomain = EventRegistrationFixtures.validDraft();
+        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(uploadedUrl);
+        org.mockito.Mockito.doThrow(new RuntimeException("Database connection timeout"))
+                .when(saveEventOutPort).save(any(EventDomain.class));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> useCase.uploadFile(eventId, fileName, fileStream, contentType, size)
+        );
+
+        // Assert
+        assertEquals("Database connection timeout", exception.getMessage());
+        ArgumentCaptor<String> deletedKeyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(storageOutPort).deleteFile(deletedKeyCaptor.capture());
+        assertTrue(deletedKeyCaptor.getValue().startsWith("coverImageEvent/" + eventId + "/cover-"));
+    }
+
+    @Test
+    void uploadFileDoesNotFailWhenDeletingOldImageThrowsException() {
+        // Arrange
+        UUID eventId = UUID.randomUUID();
+        String fileName = "banner-new.png";
+        InputStream fileStream = new ByteArrayInputStream("image-content".getBytes());
+        String contentType = "image/png";
+        long size = 1024L;
+        String oldUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-old.png";
+        String newUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-new.png";
+
+        EventDomain eventDomain = EventRegistrationFixtures.validDraft();
+        eventDomain.setCoverImageUrl(oldUrl);
+
+        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
+        org.mockito.Mockito.doThrow(new StorageIntegrationException("Falha ao excluir arquivo no S3", null))
+                .when(storageOutPort).deleteFile(oldUrl);
+
+        // Act & Assert - Não deve lançar exceção, pois exclusão de imagem antiga é não-bloqueante
+        useCase.uploadFile(eventId, fileName, fileStream, contentType, size);
+
+        // Assert
+        assertEquals(newUrl, eventDomain.getCoverImageUrl());
+        verify(saveEventOutPort).save(eventDomain);
+        verify(storageOutPort).deleteFile(oldUrl);
     }
 }

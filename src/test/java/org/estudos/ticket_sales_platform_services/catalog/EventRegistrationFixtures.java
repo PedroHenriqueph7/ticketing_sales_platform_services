@@ -29,8 +29,8 @@ public final class EventRegistrationFixtures {
     }
     public static RegisterEventRequestDTO request(String neighborhood) {
         return new RegisterEventRequestDTO(
-                CATEGORY_ID,
                 PRODUCER_ID,
+                CATEGORY_ID,
                 "Rock in Rio",
                 "Festival",
                 STARTS_AT,

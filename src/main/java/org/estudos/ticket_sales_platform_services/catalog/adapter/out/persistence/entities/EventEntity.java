@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@DynamicUpdate
 @Entity
 @Table(name = "tb_event")
 public class EventEntity {
@@ -20,13 +22,13 @@ public class EventEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
-
     // Apenas referência por ID a outro módulo
     @Column(name = "producer_id", nullable = false)
     private UUID producerId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryEntity category;
 
     @Column(nullable = false)
     private String title;
@@ -44,9 +46,6 @@ public class EventEntity {
     @Column(name = "ends_at", nullable = false)
     private OffsetDateTime endsAt;
 
-    @Column(name = "cover_image_url")
-    private String coverImageUrl;
-
     @Column(name = "address_zipcode")
     private String addressZipcode;
     @Column(name = "address_street", nullable = false)
@@ -58,6 +57,8 @@ public class EventEntity {
     @Column(name = "address_neighborhood")
     private String addressNeighborhood;
 
+    @Column(name = "cover_image_url")
+    private String coverImageUrl;
 
     public void assignCategory(CategoryEntity category) {
         if (category == null) {

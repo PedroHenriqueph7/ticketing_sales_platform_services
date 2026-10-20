@@ -9,10 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 class EventMapperTest {
+
     @Test
     void toNewEntityRejectsNullDomain() {
         assertThrows(InputObjectInvalidException.class, () -> EventMapper.toNewEntity(null));
     }
+
     @Test
     void toNewEntityCopiesFieldsAndLeavesCategoryUnassigned() {
         EventDomain domain = EventRegistrationFixtures.validDraft();

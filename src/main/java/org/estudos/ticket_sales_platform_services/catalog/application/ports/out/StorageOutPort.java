@@ -6,4 +6,6 @@ public interface StorageOutPort {
 
     String uploadFile(String fileName, InputStream inputStream, String contentType, long contentLength);
 
+    void deleteFile(String fileName);
+
 }

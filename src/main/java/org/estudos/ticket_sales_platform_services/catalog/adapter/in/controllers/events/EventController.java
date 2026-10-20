@@ -53,7 +53,10 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
     @PatchMapping(value = "/{eventId}/cover-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadImageCover(@PathVariable UUID eventId, @RequestParam("file")MultipartFile file) throws IOException {
 
-        if (file.isEmpty()){ return ResponseEntity.badRequest().build(); }
+        if (file.isEmpty()){
+            log.warn("Arquivo enviado da imagem vazio!");
+            return ResponseEntity.badRequest().build();
+        }
 
         try (InputStream fileStream = file.getInputStream()) {
             uploadCoverImageInPort.uploadFile(
@@ -64,7 +67,7 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
                     file.getSize()
             );
         }
-
+        log.info("Upload da Imagem da Capa do Evento realizado com sucesso!");
         return ResponseEntity.noContent().build();
     }
 

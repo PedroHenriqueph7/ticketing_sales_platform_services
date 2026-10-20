@@ -23,12 +23,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EventAdapterTest {
+
     @Mock
     private EventRepository eventRepository;
     @Mock
     private CategoryRepository categoryRepository;
     @InjectMocks
     private EventAdapter adapter;
+
     @Test
     void registerAssignsCategoryProxyPersistsAndReturnsGeneratedId() {
         EventDomain domain = EventRegistrationFixtures.validDraft();
@@ -47,6 +49,7 @@ class EventAdapterTest {
         assertEquals(EventStatus.DRAFT, captor.getValue().getStatus());
         assertEquals(generatedId, result);
     }
+
     @Test
     void registerDoesNotPersistWhenCategoryReferenceIsNull() {
         EventDomain domain = EventRegistrationFixtures.validDraft();

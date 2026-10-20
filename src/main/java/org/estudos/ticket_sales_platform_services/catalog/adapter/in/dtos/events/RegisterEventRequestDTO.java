@@ -9,11 +9,11 @@ import java.util.UUID;
 
 public record RegisterEventRequestDTO(
 
-        @NotNull(message = "Campo 'categoryId' é obrigatório! indique qual o id responsável pela categoria do evento ")
-        Long categoryId,
-
         @NotNull(message = "Campo 'producerId' é obrigatório!")
         UUID producerId,
+
+        @NotNull(message = "Campo 'categoryId' é obrigatório! indique qual o id responsável pela categoria do evento ")
+        Long categoryId,
 
         @NotBlank(message = "Campo 'title' é obrigatório")
         String title,

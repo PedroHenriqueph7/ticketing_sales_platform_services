@@ -27,6 +27,7 @@ public class EventDomain {
     private String addressCity;
     private String addressNeighborhood;
     private String coverImageUrl;
+    
 
     // fábrica de criação — força DRAFT e valida datas
     public static EventDomain createDraft(UUID producerId, Long categoryId, String title, String description,

@@ -9,11 +9,16 @@ import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveEventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.StorageOutPort;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
 public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadEventCoverImageUseCase.class);
 
     private final FindByEventIdOutPort findByEventIdOutPort;
     private final StorageOutPort storageOutPort;
@@ -41,15 +46,27 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
 
         EventDomain eventDomain = findByEventIdOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
 
+        String oldImageUrl = eventDomain.getCoverImageUrl();
+
         String extension = getFileExtension(fileName);
+        log.info("Extensão do arquivo identificado!");
 
         String safeFileName = generateS3ImagePath(eventId, extension);
+        log.info("Gerado o Path da image para o S3!");
 
         String coverUrl = storageOutPort.uploadFile(safeFileName, fileStream, contentType, size);
 
         eventDomain.setCoverImageUrl(coverUrl);
 
-        saveEventOutPort.save(eventDomain);
+        try {
+            saveEventOutPort.save(eventDomain);
+            log.info("Url da imagem salva no S3, persistida no banco com sucesso!");
+        } catch (Exception e) {
+            storageOutPort.deleteFile(safeFileName);
+            throw e;
+        }
+
+        deletarOldImage(oldImageUrl);
     }
 
     private String getFileExtension(String filename) {
@@ -66,6 +83,19 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
 
         if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new ImageExtensionNotAllowedException();
+        }
+        log.info("Validado a extensão do arquivo!");
+    }
+
+    private void deletarOldImage(String oldImageUrl) {
+        if (oldImageUrl != null) {
+            try {
+                log.info("Apagando Imagem da Capa antiga do evento do bucket S3");
+                storageOutPort.deleteFile(oldImageUrl);
+
+            } catch (Exception e) {
+                log.warn("Falha não-bloqueante ao excluir imagem anterior do S3: {}", oldImageUrl, e);
+            }
         }
     }
 }
