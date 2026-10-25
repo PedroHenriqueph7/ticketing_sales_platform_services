@@ -1,14 +1,14 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.CategoryRepository;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByCategoryIDOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CategoryIdOutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class CategoryAdapter implements FindByCategoryIDOutPort {
+public class CategoryAdapter implements CategoryIdOutPort {
 
     private static final Logger log = LoggerFactory.getLogger(CategoryAdapter.class);
 

@@ -6,9 +6,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistenc
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.CategoryRepository;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.EventRepository;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByEventIdOutPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.RegisterEventOutPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveEventOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class EventAdapter implements RegisterEventOutPort, FindByEventIdOutPort, SaveEventOutPort {
+public class EventAdapter implements EventOutPort {
 
     private static final Logger log = LoggerFactory.getLogger(EventAdapter.class);
 
@@ -34,13 +32,10 @@ public class EventAdapter implements RegisterEventOutPort, FindByEventIdOutPort,
     @Override
     public UUID register(EventDomain eventDomain) {
 
-        log.debug("Convertendo EventDomain para EventEntity: categoryId={}", eventDomain.getCategoryId());
-        EventEntity eventEntity = EventMapper.toNewEntity(eventDomain);
-
-        // getReferenceById NÃO dispara SELECT: cria um proxy do Hibernate
-        // contendo apenas o ID, usado só para montar a FK na hora do INSERT/UPDATE.
         CategoryEntity categoryProxy = categoryRepository.getReferenceById(eventDomain.getCategoryId());
-        eventEntity.assignCategory(categoryProxy);
+
+        log.debug("Convertendo EventDomain para EventEntity: categoryId={}", eventDomain.getCategoryId());
+        EventEntity eventEntity = EventMapper.toNewEntity(eventDomain, categoryProxy);
 
         repository.save(eventEntity);
 
@@ -58,7 +53,7 @@ public class EventAdapter implements RegisterEventOutPort, FindByEventIdOutPort,
 
     @Transactional
     @Override
-    public void save(EventDomain eventDomain) {
+    public void update(EventDomain eventDomain) {
 
         CategoryEntity categoryProxy = categoryRepository.getReferenceById(eventDomain.getCategoryId());
 

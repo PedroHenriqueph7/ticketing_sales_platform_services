@@ -1,6 +1,5 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.domain;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
@@ -29,7 +28,7 @@ public class EventDomain {
     private String coverImageUrl;
     
 
-    // fábrica de criação — força DRAFT e valida datas
+    // fábrica de criação
     public static EventDomain createDraft(UUID producerId, Long categoryId, String title, String description,
                                           OffsetDateTime startsAt, OffsetDateTime endsAt,
                                           String addressZipcode, String addressStreet, String addressNumber,

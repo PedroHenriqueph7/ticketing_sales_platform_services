@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.mappers;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
@@ -12,13 +13,15 @@ class EventMapperTest {
 
     @Test
     void toNewEntityRejectsNullDomain() {
-        assertThrows(InputObjectInvalidException.class, () -> EventMapper.toNewEntity(null));
+        assertThrows(InputObjectInvalidException.class, () -> EventMapper.toNewEntity(null, null));
     }
 
     @Test
     void toNewEntityCopiesFieldsAndLeavesCategoryUnassigned() {
+
         EventDomain domain = EventRegistrationFixtures.validDraft();
-        EventEntity entity = EventMapper.toNewEntity(domain);
+        EventEntity entity = EventMapper.toNewEntity(domain, null);
+
         assertNull(entity.getId());
         assertNull(entity.getCategory());
         assertNull(entity.getCoverImageUrl());

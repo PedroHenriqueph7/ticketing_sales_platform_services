@@ -7,8 +7,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.UploadEventCoverImageUseCase;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByEventIdOutPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveEventOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.StorageOutPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,13 +36,10 @@ import static org.mockito.Mockito.when;
 class UploadEventCoverImageUseCaseTest {
 
     @Mock
-    private FindByEventIdOutPort findByEventIdOutPort;
-
-    @Mock
     private StorageOutPort storageOutPort;
 
     @Mock
-    private SaveEventOutPort saveEventOutPort;
+    private EventOutPort eventOutPort;
 
     @InjectMocks
     private UploadEventCoverImageUseCase useCase;
@@ -59,7 +55,7 @@ class UploadEventCoverImageUseCaseTest {
         String uploadedUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-test.png";
 
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(uploadedUrl);
 
         // Act
@@ -73,7 +69,7 @@ class UploadEventCoverImageUseCaseTest {
         assertTrue(generatedKey.endsWith(".png"));
 
         assertEquals(uploadedUrl, eventDomain.getCoverImageUrl());
-        verify(saveEventOutPort).save(eventDomain);
+        verify(eventOutPort).update(eventDomain);
     }
 
     @Test
@@ -90,7 +86,7 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         assertEquals("Arquivo da imagem não pode estar vazio!", exception.getMessage());
-        verifyNoInteractions(findByEventIdOutPort, storageOutPort, saveEventOutPort);
+        verifyNoInteractions(eventOutPort, storageOutPort, eventOutPort);
     }
 
     @Test
@@ -108,7 +104,7 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         assertEquals("O tamanho da imagem excede o limite máximo permitido (5MB).", exception.getMessage());
-        verifyNoInteractions(findByEventIdOutPort, storageOutPort, saveEventOutPort);
+        verifyNoInteractions(eventOutPort, storageOutPort, eventOutPort);
     }
 
     @Test
@@ -126,7 +122,7 @@ class UploadEventCoverImageUseCaseTest {
         );
 
         // Assert
-        verifyNoInteractions(findByEventIdOutPort, storageOutPort, saveEventOutPort);
+        verifyNoInteractions(eventOutPort, storageOutPort, eventOutPort);
     }
 
     @Test
@@ -137,7 +133,7 @@ class UploadEventCoverImageUseCaseTest {
         String contentType = "image/jpeg";
         long size = 500L;
 
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.empty());
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(
@@ -146,8 +142,8 @@ class UploadEventCoverImageUseCaseTest {
         );
 
         // Assert
-        verify(findByEventIdOutPort).findByEventId(eventId);
-        verifyNoInteractions(storageOutPort, saveEventOutPort);
+        verify(eventOutPort).findByEventId(eventId);
+        verifyNoInteractions(storageOutPort, eventOutPort);
     }
 
     @Test
@@ -159,7 +155,7 @@ class UploadEventCoverImageUseCaseTest {
         long size = 500L;
 
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size)))
                 .thenThrow(new StorageIntegrationException("Falha ao realizar upload para o S3", new RuntimeException("S3 error")));
 
@@ -170,7 +166,7 @@ class UploadEventCoverImageUseCaseTest {
         );
 
         // Assert
-        verify(saveEventOutPort, never()).save(any());
+        verify(eventOutPort, never()).update(any());
     }
 
     @Test
@@ -187,7 +183,7 @@ class UploadEventCoverImageUseCaseTest {
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
         eventDomain.setCoverImageUrl(oldUrl);
 
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
 
         // Act
@@ -195,7 +191,7 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         assertEquals(newUrl, eventDomain.getCoverImageUrl());
-        verify(saveEventOutPort).save(eventDomain);
+        verify(eventOutPort).update(eventDomain);
         verify(storageOutPort).deleteFile(oldUrl);
     }
 
@@ -210,10 +206,10 @@ class UploadEventCoverImageUseCaseTest {
         String uploadedUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-test.png";
 
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(uploadedUrl);
         org.mockito.Mockito.doThrow(new RuntimeException("Database connection timeout"))
-                .when(saveEventOutPort).save(any(EventDomain.class));
+                .when(eventOutPort).update(any(EventDomain.class));
 
         // Act & Assert
         RuntimeException exception = assertThrows(
@@ -242,7 +238,7 @@ class UploadEventCoverImageUseCaseTest {
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
         eventDomain.setCoverImageUrl(oldUrl);
 
-        when(findByEventIdOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
+        when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
         org.mockito.Mockito.doThrow(new StorageIntegrationException("Falha ao excluir arquivo no S3", null))
                 .when(storageOutPort).deleteFile(oldUrl);
@@ -252,7 +248,7 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         assertEquals(newUrl, eventDomain.getCoverImageUrl());
-        verify(saveEventOutPort).save(eventDomain);
+        verify(eventOutPort).update(eventDomain);
         verify(storageOutPort).deleteFile(oldUrl);
     }
 }

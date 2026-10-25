@@ -9,7 +9,7 @@ public final class EventMapper {
 
     private EventMapper(){}
 
-    public static EventEntity toNewEntity(EventDomain domain) {
+    public static EventEntity toNewEntity(EventDomain domain, CategoryEntity categoryEntity) {
 
         if (domain == null) {
             throw new InputObjectInvalidException("EventDomain is null");
@@ -18,7 +18,7 @@ public final class EventMapper {
         return new EventEntity(
                 domain.getId(),
                 domain.getProducerId(),
-                null,
+                categoryEntity,
                 domain.getTitle(),
                 domain.getDescription(),
                 domain.getStatus(),

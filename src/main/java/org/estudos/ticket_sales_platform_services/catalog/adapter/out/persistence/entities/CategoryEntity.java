@@ -14,4 +14,5 @@ public class CategoryEntity {
 
     @Column(nullable = false)
     private String name;
+
 }

@@ -60,10 +60,4 @@ public class EventEntity {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
-    public void assignCategory(CategoryEntity category) {
-        if (category == null) {
-            throw new IllegalArgumentException("category cannot be null");
-        }
-        this.category = category;
-    }
 }

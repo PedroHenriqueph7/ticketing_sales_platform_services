@@ -5,8 +5,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.FindByEventIdOutPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveEventOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.StorageOutPort;
 
 import org.slf4j.Logger;
@@ -20,14 +19,12 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
 
     private static final Logger log = LoggerFactory.getLogger(UploadEventCoverImageUseCase.class);
 
-    private final FindByEventIdOutPort findByEventIdOutPort;
     private final StorageOutPort storageOutPort;
-    private final SaveEventOutPort saveEventOutPort;
+    private final EventOutPort eventOutPort;
 
-    public UploadEventCoverImageUseCase(FindByEventIdOutPort findByEventIdOutPort, StorageOutPort storageOutPort, SaveEventOutPort saveEventOutPort) {
-        this.findByEventIdOutPort = findByEventIdOutPort;
+    public UploadEventCoverImageUseCase( StorageOutPort storageOutPort, EventOutPort eventOutPort) {
         this.storageOutPort = storageOutPort;
-        this.saveEventOutPort = saveEventOutPort;
+        this.eventOutPort = eventOutPort;
     }
 
     private final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
@@ -44,7 +41,7 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
 
         validateImageExtension(contentType);
 
-        EventDomain eventDomain = findByEventIdOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
+        EventDomain eventDomain = eventOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
 
         String oldImageUrl = eventDomain.getCoverImageUrl();
 
@@ -59,7 +56,7 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
         eventDomain.setCoverImageUrl(coverUrl);
 
         try {
-            saveEventOutPort.save(eventDomain);
+            eventOutPort.update(eventDomain);
             log.info("Url da imagem salva no S3, persistida no banco com sucesso!");
         } catch (Exception e) {
             storageOutPort.deleteFile(safeFileName);

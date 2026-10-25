@@ -1,8 +1,10 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.dependencyInjection;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateEventUseCase;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateTicketTicketBatchUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.UploadEventCoverImageUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.*;
 import org.springframework.context.annotation.Bean;
@@ -13,27 +15,37 @@ public class CatalogBeansConfig {
 
     @Bean
     public CreateEventInPort createEventInPort(
-            FindByCategoryIDOutPort findByCategoryIDOutPort,
+            CategoryIdOutPort categoryIdOutPort,
             CheckProducerExistsOutPort checkProducerExistsOutPort,
-            RegisterEventOutPort registerEventOutPort
+            EventOutPort eventOutPort
     ) {
         return new CreateEventUseCase(
-                findByCategoryIDOutPort,
+                categoryIdOutPort,
                 checkProducerExistsOutPort,
-                registerEventOutPort
+                eventOutPort
         );
     }
 
     @Bean
     public UploadCoverImageInPort uploadCoverImageInPort(
-            FindByEventIdOutPort findByEventIdOutPort,
             StorageOutPort storageOutPort,
-            SaveEventOutPort saveEventOutPort
+            EventOutPort eventOutPort
     ) {
         return new UploadEventCoverImageUseCase(
-                findByEventIdOutPort,
                 storageOutPort,
-                saveEventOutPort
+                eventOutPort
         );
+    }
+
+    @Bean
+    public CreateTicketBatchInPort createTicketBatchInPort(
+            TicketBatchOutPort ticketBatchOutPort,
+            SaveSeatsOutPort saveSeatsOutPort,
+            EventOutPort eventOutPort
+    ) {
+        return new CreateTicketTicketBatchUseCase(
+                ticketBatchOutPort,
+                saveSeatsOutPort,
+                eventOutPort);
     }
 }

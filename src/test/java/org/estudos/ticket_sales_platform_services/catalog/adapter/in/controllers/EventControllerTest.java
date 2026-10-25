@@ -9,6 +9,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling.GlobalCatalogExceptionHandler;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
@@ -43,19 +44,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
+
     @Mock
     private CreateEventInPort createEventInPort;
     @Mock
     private UploadCoverImageInPort uploadCoverImageInPort;
     @Mock
+    private CreateTicketBatchInPort createTicketBatchInPort;
+
+    @Mock
     private ApplicationEventPublisher eventPublisher;
     private MockMvc mockMvc;
+
     @BeforeEach
     void setUp() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort))
+        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort))
                 .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
                 .build();
