@@ -53,7 +53,7 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
 
         String coverUrl = storageOutPort.uploadFile(safeFileName, fileStream, contentType, size);
 
-        eventDomain.setCoverImageUrl(coverUrl);
+        eventDomain.updateCoverImage(coverUrl);
 
         try {
             eventOutPort.update(eventDomain);

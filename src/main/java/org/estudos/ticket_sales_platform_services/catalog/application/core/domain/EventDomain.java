@@ -50,7 +50,12 @@ public class EventDomain {
         }
     }
 
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
+    public void updateCoverImage(String imageUrl) {
+        this.coverImageUrl = imageUrl;
+    }
+
+    public void publish() {
+        // valida se tem imagem e lotes antes de publicar
+        this.status = EventStatus.PUBLISHED;
     }
 }

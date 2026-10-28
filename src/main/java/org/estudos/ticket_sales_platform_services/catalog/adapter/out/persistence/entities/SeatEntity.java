@@ -13,12 +13,13 @@ public class SeatEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn
+    @JoinColumn(name = "ticket_batch_id", nullable = false)
     private TicketBatchEntity batchEntity;
 
-    @Column
+    @Column(nullable = false)
     private String code;
-    @Column
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
 }

@@ -7,7 +7,7 @@ spring:
   application:
     name: ticketing-platform
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   cloud:
     aws:
       endpoint: http://localhost:4566

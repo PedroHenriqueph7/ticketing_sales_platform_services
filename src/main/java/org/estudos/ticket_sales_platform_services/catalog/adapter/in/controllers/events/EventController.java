@@ -6,7 +6,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
+
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +76,7 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/batches")
+    @PostMapping("{eventId}/batches")
     public ResponseEntity<Void> createBatch(@PathVariable UUID eventId,
             @RequestBody @Valid CreateTicketBatchRequestDTO request) {
 

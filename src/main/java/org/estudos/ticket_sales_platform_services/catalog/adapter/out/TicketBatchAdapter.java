@@ -8,7 +8,9 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistenc
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.TicketBatchOutPort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -24,26 +26,24 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
 
 
     @Override
-    public UUID save(TicketBatchDomain batchDomain) {
+    @Transactional
+    public TicketBatchDomain save(TicketBatchDomain batchDomain) {
 
         EventEntity eventProxy = eventRepository.getReferenceById(batchDomain.getEventId());
 
         TicketBatchEntity entity = TicketBatchMapperOut.toEntity(batchDomain, eventProxy);
 
-        ticketBatchRepository.save(entity);
-
-        return entity.getId();
+        return TicketBatchMapperOut.toDomain(ticketBatchRepository.save(entity));
     }
 
     @Override
-    public TicketBatchDomain findByBatchEventId(UUID eventId) {
-
-        TicketBatchEntity entity = ticketBatchRepository.findByEventId(eventId);
-        return TicketBatchMapperOut.toDomain(entity);
+    public Optional<TicketBatchDomain> findByBatchEventId(UUID eventId) {
+        return ticketBatchRepository.findTopByEventEntityIdOrderByEndsAtDesc(eventId)
+                .map(TicketBatchMapperOut::toDomain);
     }
 
     @Override
     public Boolean existsByEventIdAndName(UUID eventId, String batchName) {
-        return existsByEventIdAndName(eventId,batchName);
+        return ticketBatchRepository.existsByEventEntityIdAndName(eventId, batchName);
     }
 }

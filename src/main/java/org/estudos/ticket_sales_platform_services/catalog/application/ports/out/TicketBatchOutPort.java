@@ -7,9 +7,9 @@ import java.util.UUID;
 
 public interface TicketBatchOutPort {
 
-    UUID save(TicketBatchDomain batchDomain);
+    TicketBatchDomain save(TicketBatchDomain batchDomain);
 
-    TicketBatchDomain findByBatchEventId(UUID eventId);
+    Optional<TicketBatchDomain> findByBatchEventId(UUID eventId);
 
     Boolean existsByEventIdAndName(UUID eventId, String batchName);
 }

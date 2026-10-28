@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
@@ -17,15 +18,19 @@ public record CreateTicketBatchRequestDTO(
 
         @NotNull(message = "A quantidade total é obrigatória.")
         @Positive(message = "A quantidade total de ingressos deve ser maior que zero.")
+        @Max(value = 3000, message = "Um lote não pode ter mais de 3.000 ingressos.")
         Integer totalQuantity,
 
         @NotNull(message = "A data de início das vendas é obrigatória.")
+        @FutureOrPresent
         Instant startsAt,
 
         @NotNull(message = "A data de término das vendas é obrigatória.")
         @Future(message = "A data de término do lote deve estar no futuro.")
         Instant endsAt,
 
+        @Valid
+        @Size(max = 3000)
         List<SeatRequestDTO> seats
 
 ) {

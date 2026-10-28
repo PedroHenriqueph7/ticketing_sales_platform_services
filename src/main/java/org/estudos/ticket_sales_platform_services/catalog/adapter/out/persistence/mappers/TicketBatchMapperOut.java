@@ -21,6 +21,7 @@ public final class TicketBatchMapperOut {
                 domain.getName(),
                 domain.getPrice(),
                 domain.getCapacity(),
+                domain.getAvailableQuantity(),
                 domain.getStartsAt(),
                 domain.getEndsAt()
         );
@@ -38,6 +39,7 @@ public final class TicketBatchMapperOut {
                 entity.getName(),
                 entity.getPrice(),
                 entity.getCapacity(),
+                entity.getAvailableQuantity(),
                 entity.getStartsAt(),
                 entity.getEndsAt()
         );

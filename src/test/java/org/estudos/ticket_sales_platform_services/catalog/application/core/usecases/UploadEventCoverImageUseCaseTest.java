@@ -181,7 +181,7 @@ class UploadEventCoverImageUseCaseTest {
         String newUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-new.png";
 
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
-        eventDomain.setCoverImageUrl(oldUrl);
+        eventDomain.updateCoverImage(oldUrl);
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
@@ -236,7 +236,7 @@ class UploadEventCoverImageUseCaseTest {
         String newUrl = "https://s3.amazonaws.com/bucket/coverImageEvent/" + eventId + "/cover-new.png";
 
         EventDomain eventDomain = EventRegistrationFixtures.validDraft();
-        eventDomain.setCoverImageUrl(oldUrl);
+        eventDomain.updateCoverImage(oldUrl);
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(eventDomain));
         when(storageOutPort.uploadFile(anyString(), eq(fileStream), eq(contentType), eq(size))).thenReturn(newUrl);
