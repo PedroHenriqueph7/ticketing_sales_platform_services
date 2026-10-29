@@ -4,6 +4,8 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions.StorageIntegrationException;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
@@ -325,6 +327,72 @@ class EventControllerTest {
         // Assert
         result.andExpect(status().isBadRequest());
         verify(uploadCoverImageInPort, never()).uploadFile(any(), any(), any(), any(), anyLong());
+    }
+
+    @Test
+    void createBatchReturnsNoContentWhenRequestIsValid() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        mockMvc.perform(post("/v1/events/{eventId}/batches", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(batchPayload(true)))
+                .andExpect(status().isNoContent());
+
+        verify(createTicketBatchInPort).execute(eq(eventId), any(CreateTicketBatchRequestDTO.class));
+    }
+
+    @Test
+    void createBatchReturnsBadRequestWhenNameIsBlank() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        String invalidPayload = "{"
+                + "\"name\":\"\","
+                + "\"price\":100.00,"
+                + "\"totalQuantity\":50,"
+                + "\"startsAt\":\"2099-01-01T08:00:00-03:00\","
+                + "\"endsAt\":\"2099-01-05T23:59:59-03:00\""
+                + "}";
+
+        mockMvc.perform(post("/v1/events/{eventId}/batches", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidPayload))
+                .andExpect(status().isBadRequest());
+
+        verify(createTicketBatchInPort, never()).execute(any(), any());
+    }
+
+    @Test
+    void createBatchReturnsNotFoundWhenEventDoesNotExist() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new EventNotFoundException()).when(createTicketBatchInPort).execute(eq(eventId), any());
+
+        mockMvc.perform(post("/v1/events/{eventId}/batches", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(batchPayload(false)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createBatchReturnsBadRequestWhenBusinessRuleFails() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new BatchCreationNotPossibleException("Lote inválido"))
+                .when(createTicketBatchInPort).execute(eq(eventId), any());
+
+        mockMvc.perform(post("/v1/events/{eventId}/batches", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(batchPayload(false)))
+                .andExpect(status().isBadRequest());
+    }
+
+    private static String batchPayload(boolean withSeats) {
+        String seats = withSeats ? ",\"seats\":[{\"code\":\"A-01\"},{\"code\":\"A-02\"}]" : "";
+        int quantity = withSeats ? 2 : 100;
+        return "{"
+                + "\"name\":\"1° Lote - Pista\","
+                + "\"price\":150.00,"
+                + "\"totalQuantity\":" + quantity + ","
+                + "\"startsAt\":\"2099-01-01T08:00:00-03:00\","
+                + "\"endsAt\":\"2099-01-09T23:59:59-03:00\""
+                + seats
+                + "}";
     }
 
     private static String payload(boolean includeNeighborhood) {

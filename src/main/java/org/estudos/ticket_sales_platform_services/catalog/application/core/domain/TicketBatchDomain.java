@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -19,10 +19,10 @@ public class TicketBatchDomain {
     private BigDecimal price;
     private int capacity;
     private int availableQuantity;
-    private Instant startsAt;
-    private Instant endsAt;
+    private OffsetDateTime startsAt;
+    private OffsetDateTime endsAt;
 
-    public TicketBatchDomain(UUID eventId, String name, BigDecimal price, int capacity,  Instant startsAt,  Instant endsAt) {
+    public TicketBatchDomain(UUID eventId, String name, BigDecimal price, int capacity, OffsetDateTime startsAt, OffsetDateTime endsAt) {
         this.id = UuidCreator.getTimeOrderedEpoch();
         this.eventId = eventId;
         this.name = name;
@@ -35,7 +35,7 @@ public class TicketBatchDomain {
         this.endsAt = endsAt;
     }
 
-    public TicketBatchDomain(UUID id, UUID eventId, String name, BigDecimal price, int capacity, int availableQuantity, Instant startsAt, Instant endsAt) {
+    public TicketBatchDomain(UUID id, UUID eventId, String name, BigDecimal price, int capacity, int availableQuantity, OffsetDateTime startsAt, OffsetDateTime endsAt) {
         this.id = id;
         this.eventId = eventId;
         this.name = name;
@@ -46,10 +46,10 @@ public class TicketBatchDomain {
         this.endsAt = endsAt;
     }
 
-    private static void validateDates(Instant startsAt, Instant endsAt) {
+    private static void validateDates(OffsetDateTime startsAt, OffsetDateTime endsAt) {
         if (!startsAt.isBefore(endsAt)) {
             throw new BatchCreationNotPossibleException(
-                    "A data de início de um lote deve ser anterior a data de encerramento de um lote.");
+                    "A data de início do lote deve ser anterior a data de encerramento.");
         }
     }
 }

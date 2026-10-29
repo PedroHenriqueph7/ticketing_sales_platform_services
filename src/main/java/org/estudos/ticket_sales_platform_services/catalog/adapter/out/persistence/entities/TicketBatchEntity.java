@@ -8,7 +8,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -32,15 +32,15 @@ public class TicketBatchEntity implements Persistable<UUID> {
     private int capacity;
     @Column(nullable = false)
     private int availableQuantity;
-    @Column(nullable = false)
-    private Instant startsAt;
-    @Column(nullable = false)
-    private Instant endsAt;
+    @Column(name = "starts_at", nullable = false)
+    private OffsetDateTime startsAt;
+    @Column(name = "ends_at", nullable = false)
+    private OffsetDateTime endsAt;
 
     @Transient
     private boolean isNew = true;
 
-    public TicketBatchEntity(UUID id, EventEntity eventEntity, String name, BigDecimal price, int capacity, int availableQuantity, Instant startsAt, Instant endsAt) {
+    public TicketBatchEntity(UUID id, EventEntity eventEntity, String name, BigDecimal price, int capacity, int availableQuantity, OffsetDateTime startsAt, OffsetDateTime endsAt) {
         this.id = id;
         this.eventEntity = eventEntity;
         this.name = name;

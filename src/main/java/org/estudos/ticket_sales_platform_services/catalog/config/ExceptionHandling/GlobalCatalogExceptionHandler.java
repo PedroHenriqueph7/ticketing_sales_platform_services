@@ -1,11 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions.StorageIntegrationException;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.*;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+
+import java.security.cert.CertificateRevokedException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -46,6 +44,7 @@ public class GlobalCatalogExceptionHandler {
         );
     }
 
+
     @ExceptionHandler(EventNotFoundException.class)
     public ProblemDetail handleEventNotFoundException(EventNotFoundException ex) {
         log.warn("Regra de negócio violada - evento não encontrado: {}", ex.getMessage());
@@ -53,6 +52,28 @@ public class GlobalCatalogExceptionHandler {
         return problem(
                 HttpStatus.NOT_FOUND,
                 "Evento não encontrado",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(BatchCreationNotPossibleException.class)
+    public ProblemDetail handleBatchCreationNotPossibleException(BatchCreationNotPossibleException ex) {
+        log.warn("Regra de negócio violada - lote não criado: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Lote não criado!",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(BatchCreationFailedDueToCompletedEventException.class)
+    public ProblemDetail handleBatchCreationFailedDueToCompletedEventException(BatchCreationFailedDueToCompletedEventException ex) {
+        log.warn("Regra de negócio violada - lote não criado: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Lote não criado!",
                 ex.getMessage()
         );
     }

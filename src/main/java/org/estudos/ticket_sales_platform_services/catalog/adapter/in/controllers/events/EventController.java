@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controller
 
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateEventControllerDocs;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateTicketBatchControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.UploadCoverImageControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
@@ -25,7 +26,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/v1/events")
-public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs {
+public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs, CreateTicketBatchControllerDocs {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
@@ -76,11 +77,17 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
         return ResponseEntity.noContent().build();
     }
 
+    @Override
     @PostMapping("{eventId}/batches")
     public ResponseEntity<Void> createBatch(@PathVariable UUID eventId,
             @RequestBody @Valid CreateTicketBatchRequestDTO request) {
 
+        log.info("Recebida requisição para criar lote de ingressos: eventId={}, name={}, totalQuantity={}, price={}",
+                eventId, request.name(), request.totalQuantity(), request.price());
+
         createTicketBatchInPort.execute(eventId, request);
+
+        log.info("Lote de ingressos criado com sucesso: eventId={}, name={}", eventId, request.name());
         return ResponseEntity.noContent().build();
     }
 }
