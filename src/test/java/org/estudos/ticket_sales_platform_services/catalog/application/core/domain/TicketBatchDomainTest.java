@@ -1,7 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.domain;
 
 import org.estudos.ticket_sales_platform_services.catalog.TicketBatchFixtures;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,8 +43,8 @@ class TicketBatchDomainTest {
         UUID eventId = UUID.randomUUID();
         OffsetDateTime sameDate = TicketBatchFixtures.BATCH_STARTS_AT;
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> new TicketBatchDomain(eventId, "Lote Inválido", BigDecimal.TEN, 10, sameDate, sameDate)
         );
 
@@ -58,8 +58,8 @@ class TicketBatchDomainTest {
         OffsetDateTime startsAt = TicketBatchFixtures.BATCH_ENDS_AT;
         OffsetDateTime endsAt = TicketBatchFixtures.BATCH_STARTS_AT;
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> new TicketBatchDomain(eventId, "Lote Inválido", BigDecimal.TEN, 10, startsAt, endsAt)
         );
 

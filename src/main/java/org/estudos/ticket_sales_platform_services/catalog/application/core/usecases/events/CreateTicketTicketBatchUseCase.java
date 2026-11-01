@@ -6,7 +6,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.domai
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.SeatDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
@@ -60,7 +60,7 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
             if (ticketBatch.getStartsAt().isBefore(previous.getEndsAt())) {
                 log.warn("Tentativa de criar lote com data de início ({}) anterior ao fim do lote anterior ({}) para o evento: eventId={}",
                         ticketBatch.getStartsAt(), previous.getEndsAt(), eventId);
-                throw new BatchCreationNotPossibleException(
+                throw new EventValidationException(
                         "Criação do lote não permitida! Pois lote anterior ainda não finalizado, data de finalização do lote anterior: "
                                 + previous.getEndsAt());
             }
@@ -87,24 +87,24 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
     private void validateEventAndChronology(EventDomain event, CreateTicketBatchRequestDTO dto) {
 
         if (event.getStatus().equals(EventStatus.FINISHED)){
-            throw new BatchCreationNotPossibleException("Lote não foi criado, pois o evento referenciado ja foi finalizado!");
+            throw new EventValidationException("Lote não foi criado, pois o evento referenciado ja foi finalizado!");
         }
 
         if (dto.startsAt().isAfter(event.getEndsAt())) {
-            throw new BatchCreationNotPossibleException("O início do lote não pode ser posterior ao fim do evento.");
+            throw new EventValidationException("O início do lote não pode ser posterior ao fim do evento.");
         }
 
         if (dto.endsAt().isAfter(event.getStartsAt())) {
-            throw new BatchCreationNotPossibleException("O término do lote não pode ultrapassar a data inicial do evento.");
+            throw new EventValidationException("O término do lote não pode ultrapassar a data inicial do evento.");
         }
         if (ticketBatchOutPort.existsByEventIdAndName(event.getId(), dto.name())) {
-            throw new BatchCreationNotPossibleException("Já existe um lote com este nome para o evento.");
+            throw new EventValidationException("Já existe um lote com este nome para o evento.");
         }
     }
 
     private void validateSeats(CreateTicketBatchRequestDTO dto) {
         if (dto.seats().size() != dto.totalQuantity()) {
-            throw new BatchCreationNotPossibleException("A quantidade de assentos informada (" + dto.seats().size() +
+            throw new EventValidationException("A quantidade de assentos informada (" + dto.seats().size() +
                     ") não corresponde à quantidade total declarada (" + dto.totalQuantity() + ").");
         }
 
@@ -112,7 +112,7 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         for (CreateTicketBatchRequestDTO.SeatRequestDTO seat : dto.seats()) {
             String normalizedCode = seat.code().trim().toUpperCase();
             if (!uniqueCodes.add(normalizedCode)) {
-                throw new BatchCreationNotPossibleException(
+                throw new EventValidationException(
                         "Código de assento duplicado encontrado no lote: " + seat.code());
             }
         }

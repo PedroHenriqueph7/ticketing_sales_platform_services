@@ -5,7 +5,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
@@ -54,6 +54,7 @@ class EventControllerTest {
     @Mock
     private CreateTicketBatchInPort createTicketBatchInPort;
 
+
     @Mock
     private ApplicationEventPublisher eventPublisher;
     private MockMvc mockMvc;
@@ -63,7 +64,7 @@ class EventControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort))
+        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort, publishEventInPort))
                 .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
                 .build();
@@ -373,7 +374,7 @@ class EventControllerTest {
     @Test
     void createBatchReturnsBadRequestWhenBusinessRuleFails() throws Exception {
         UUID eventId = UUID.randomUUID();
-        doThrow(new BatchCreationNotPossibleException("Lote inválido"))
+        doThrow(new EventValidationException("Lote inválido"))
                 .when(createTicketBatchInPort).execute(eq(eventId), any());
 
         mockMvc.perform(post("/v1/events/{eventId}/batches", eventId)

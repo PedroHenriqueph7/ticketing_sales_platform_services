@@ -3,6 +3,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 
 import java.time.OffsetDateTime;
@@ -55,7 +56,12 @@ public class EventDomain {
     }
 
     public void publish() {
-        // valida se tem imagem e lotes antes de publicar
+        if (this.status != EventStatus.DRAFT) {
+            throw new DomainValidationException("Apenas eventos no estado RASCUNHO (DRAFT) podem ser publicados.");
+        }
+        if (this.coverImageUrl == null || this.coverImageUrl.isBlank()) {
+            throw new DomainValidationException("O evento precisa de uma imagem de capa antes de ser publicado.");
+        }
         this.status = EventStatus.PUBLISHED;
     }
 }

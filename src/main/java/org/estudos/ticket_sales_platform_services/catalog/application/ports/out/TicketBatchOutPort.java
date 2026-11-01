@@ -12,4 +12,6 @@ public interface TicketBatchOutPort {
     Optional<TicketBatchDomain> findByBatchEventId(UUID eventId);
 
     Boolean existsByEventIdAndName(UUID eventId, String batchName);
+
+    Boolean existsByEventId(UUID eventID);
 }

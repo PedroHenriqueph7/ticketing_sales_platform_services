@@ -11,4 +11,5 @@ public interface TicketBatchRepository extends JpaRepository<TicketBatchEntity, 
     Optional<TicketBatchEntity> findTopByEventEntityIdOrderByEndsAtDesc(UUID eventId);
 
     Boolean existsByEventEntityIdAndName(UUID eventId, String batchName);
+    Boolean existsByEventEntityId(UUID eventId);
 }

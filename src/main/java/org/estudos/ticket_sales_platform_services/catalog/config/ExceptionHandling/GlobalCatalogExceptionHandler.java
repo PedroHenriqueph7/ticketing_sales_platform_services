@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import java.security.cert.CertificateRevokedException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -56,8 +55,8 @@ public class GlobalCatalogExceptionHandler {
         );
     }
 
-    @ExceptionHandler(BatchCreationNotPossibleException.class)
-    public ProblemDetail handleBatchCreationNotPossibleException(BatchCreationNotPossibleException ex) {
+    @ExceptionHandler(EventValidationException.class)
+    public ProblemDetail handleBatchCreationNotPossibleException(EventValidationException ex) {
         log.warn("Regra de negócio violada - lote não criado: {}", ex.getMessage());
 
         return problem(

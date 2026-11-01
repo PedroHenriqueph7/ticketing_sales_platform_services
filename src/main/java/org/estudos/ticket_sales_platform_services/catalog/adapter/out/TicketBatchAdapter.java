@@ -56,4 +56,9 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
         log.debug("Verificando se já existe lote com nome '{}' para o evento: eventId={}", batchName, eventId);
         return ticketBatchRepository.existsByEventEntityIdAndName(eventId, batchName);
     }
+
+    @Override
+    public Boolean existsByEventId(UUID eventID) {
+        return  ticketBatchRepository.existsByEventEntityId(eventID);
+    }
 }

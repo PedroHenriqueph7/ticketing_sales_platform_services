@@ -3,7 +3,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -48,7 +48,7 @@ public class TicketBatchDomain {
 
     private static void validateDates(OffsetDateTime startsAt, OffsetDateTime endsAt) {
         if (!startsAt.isBefore(endsAt)) {
-            throw new BatchCreationNotPossibleException(
+            throw new EventValidationException(
                     "A data de início do lote deve ser anterior a data de encerramento.");
         }
     }

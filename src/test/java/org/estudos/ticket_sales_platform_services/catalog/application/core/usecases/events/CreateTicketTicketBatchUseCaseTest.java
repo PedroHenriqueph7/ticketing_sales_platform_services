@@ -7,7 +7,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.BatchCreationNotPossibleException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.SaveSeatsOutPort;
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,8 +117,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(finishedEvent));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -145,8 +144,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(event));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -171,8 +170,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(event));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -189,8 +188,8 @@ class CreateTicketTicketBatchUseCaseTest {
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(event));
         when(ticketBatchOutPort.existsByEventIdAndName(event.getId(), request.name())).thenReturn(true);
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -221,8 +220,8 @@ class CreateTicketTicketBatchUseCaseTest {
         when(ticketBatchOutPort.existsByEventIdAndName(event.getId(), request.name())).thenReturn(false);
         when(ticketBatchOutPort.findByBatchEventId(eventId)).thenReturn(Optional.of(previousBatch));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -248,8 +247,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(event));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 
@@ -274,8 +273,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         when(eventOutPort.findByEventId(eventId)).thenReturn(Optional.of(event));
 
-        BatchCreationNotPossibleException ex = assertThrows(
-                BatchCreationNotPossibleException.class,
+        EventValidationException ex = assertThrows(
+                EventValidationException.class,
                 () -> useCase.execute(eventId, request)
         );
 

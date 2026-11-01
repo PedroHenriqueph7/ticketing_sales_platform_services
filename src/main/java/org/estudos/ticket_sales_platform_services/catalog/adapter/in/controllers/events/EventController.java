@@ -10,6 +10,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.Eve
 
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,11 +35,13 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
     private final CreateEventInPort createEventInPort;
     private final UploadCoverImageInPort uploadCoverImageInPort;
     private final CreateTicketBatchInPort createTicketBatchInPort;
+    private final PublishEventInPort publishEventInPort;
 
-    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort) {
+    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort, PublishEventInPort publishEventInPort1) {
         this.createEventInPort = createEventInPort;
         this.uploadCoverImageInPort = uploadCoverImageInPort;
         this.createTicketBatchInPort = createTicketBatchInPort;
+        this.publishEventInPort = publishEventInPort1;
     }
 
     @Override
@@ -78,7 +82,7 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
     }
 
     @Override
-    @PostMapping("{eventId}/batches")
+    @PostMapping("/{eventId}/batches")
     public ResponseEntity<Void> createBatch(@PathVariable UUID eventId,
             @RequestBody @Valid CreateTicketBatchRequestDTO request) {
 
@@ -89,5 +93,19 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
         log.info("Lote de ingressos criado com sucesso: eventId={}, name={}", eventId, request.name());
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{eventId}/publish")
+    public ResponseEntity<Void> publishEvent(@PathVariable("eventId")UUID eventId) {
+
+        publishEventInPort.execute(eventId);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/api/v1/events/{id}")
+                .buildAndExpand(eventId)
+                .toUri();
+
+        return ResponseEntity.noContent().location(location).build();
     }
 }

@@ -3,5 +3,6 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 public enum EventStatus {
     DRAFT,
     PUBLISHED,
-    FINISHED
+    FINISHED,
+    CANCELLED
 }
