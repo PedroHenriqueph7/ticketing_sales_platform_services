@@ -99,15 +99,24 @@ public class GlobalCatalogExceptionHandler {
         );
     }
 
-    @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class, MultipartException.class})
-    public ProblemDetail handleMissingMultipartFile(Exception ex) {
-        log.warn("Parâmetro ou parte multipart obrigatória ausente: {}", ex.getMessage());
+    @ExceptionHandler(DomainValidationException.class)
+    public ProblemDetail handleDomainValidationException(DomainValidationException ex) {
+        log.warn("Regra de negócio violada - dominio invalido: {}", ex.getMessage());
 
         return problem(
-                HttpStatus.BAD_REQUEST,
-                "Parâmetro obrigatório ausente",
-                ex.getMessage()
-        );
+                HttpStatus.NOT_FOUND,
+                "Dominio invalido",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateEventException.class)
+    public ProblemDetail handleIllegalStateEventException(IllegalStateEventException ex) {
+        log.warn("Regra de negócio violada - Estado interno do Evento invalido: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.NOT_FOUND,
+                "Estado interno do Evento invalido",
+                ex.getMessage());
     }
 
     @ExceptionHandler(InvalidDateException.class)
@@ -139,6 +148,17 @@ public class GlobalCatalogExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Integração com S3 falhou",
                 ex.getMessage());
+    }
+
+    @ExceptionHandler({MissingServletRequestPartException.class, MissingServletRequestParameterException.class, MultipartException.class})
+    public ProblemDetail handleMissingMultipartFile(Exception ex) {
+        log.warn("Parâmetro ou parte multipart obrigatória ausente: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro obrigatório ausente",
+                ex.getMessage()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

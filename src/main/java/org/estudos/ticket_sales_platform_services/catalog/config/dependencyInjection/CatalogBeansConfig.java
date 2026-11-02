@@ -2,9 +2,11 @@ package org.estudos.ticket_sales_platform_services.catalog.config.dependencyInje
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateEventUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateTicketTicketBatchUseCase;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.PublishEventUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.UploadEventCoverImageUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.*;
 import org.springframework.context.annotation.Bean;
@@ -47,5 +49,17 @@ public class CatalogBeansConfig {
                 ticketBatchOutPort,
                 saveSeatsOutPort,
                 eventOutPort);
+    }
+
+    @Bean
+    public PublishEventInPort publishEventInPort(
+            EventOutPort eventOutPort,
+            TicketBatchOutPort ticketBatchOutPort
+
+    ) {
+        return new PublishEventUseCase(
+                eventOutPort,
+                ticketBatchOutPort
+                );
     }
 }

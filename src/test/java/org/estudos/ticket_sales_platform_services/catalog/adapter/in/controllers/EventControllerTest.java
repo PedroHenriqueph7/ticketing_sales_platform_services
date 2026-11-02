@@ -12,6 +12,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling.GlobalCatalogExceptionHandler;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
@@ -53,7 +54,8 @@ class EventControllerTest {
     private UploadCoverImageInPort uploadCoverImageInPort;
     @Mock
     private CreateTicketBatchInPort createTicketBatchInPort;
-
+    @Mock
+    private PublishEventInPort publishEventInPort;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;

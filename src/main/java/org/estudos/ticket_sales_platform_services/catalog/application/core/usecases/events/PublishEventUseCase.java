@@ -1,8 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.IllegalStateEventException;
@@ -12,18 +10,15 @@ import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.TicketBatchOutPort;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 public class PublishEventUseCase implements PublishEventInPort {
 
     private final EventOutPort eventOutPort;
-    private final StorageOutPort storageOutPort;
     private final TicketBatchOutPort ticketBatchOutPort;
 
-    public PublishEventUseCase(EventOutPort eventOutPort, StorageOutPort storageOutPort, TicketBatchOutPort ticketBatchOutPort) {
+    public PublishEventUseCase(EventOutPort eventOutPort, TicketBatchOutPort ticketBatchOutPort) {
         this.eventOutPort = eventOutPort;
-        this.storageOutPort = storageOutPort;
         this.ticketBatchOutPort = ticketBatchOutPort;
     }
 
@@ -33,7 +28,7 @@ public class PublishEventUseCase implements PublishEventInPort {
 
         EventDomain eventDomain = eventOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
 
-        if (OffsetDateTime.now().isBefore(eventDomain.getStartsAt())){
+        if (OffsetDateTime.now().isAfter(eventDomain.getStartsAt())){
             throw new IllegalStateEventException("A publicação não pode ser feita após a data de inicio do evento!");
         }
 
