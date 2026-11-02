@@ -122,4 +122,38 @@ class TicketBatchAdapterTest {
         assertTrue(exists);
         verify(ticketBatchRepository).existsByEventEntityIdAndName(eventId, batchName);
     }
+
+    @Test
+    @DisplayName("Deve retornar true quando existirem lotes ativos para publicação")
+    void shouldReturnTrueWhenActiveBatchesExistForPublication() {
+        // Arrange
+        UUID eventId = UUID.randomUUID();
+        OffsetDateTime publicationTime = OffsetDateTime.now();
+
+        when(ticketBatchRepository.existsByEventEntityIdAndEndsAtAfter(eventId, publicationTime)).thenReturn(true);
+
+        // Act
+        Boolean result = adapter.hasActiveBatchesForPublication(eventId, publicationTime);
+
+        // Assert
+        assertTrue(result);
+        verify(ticketBatchRepository).existsByEventEntityIdAndEndsAtAfter(eventId, publicationTime);
+    }
+
+    @Test
+    @DisplayName("Deve retornar false quando não existirem lotes ativos para publicação")
+    void shouldReturnFalseWhenNoActiveBatchesExistForPublication() {
+        // Arrange
+        UUID eventId = UUID.randomUUID();
+        OffsetDateTime publicationTime = OffsetDateTime.now();
+
+        when(ticketBatchRepository.existsByEventEntityIdAndEndsAtAfter(eventId, publicationTime)).thenReturn(false);
+
+        // Act
+        Boolean result = adapter.hasActiveBatchesForPublication(eventId, publicationTime);
+
+        // Assert
+        assertFalse(result);
+        verify(ticketBatchRepository).existsByEventEntityIdAndEndsAtAfter(eventId, publicationTime);
+    }
 }

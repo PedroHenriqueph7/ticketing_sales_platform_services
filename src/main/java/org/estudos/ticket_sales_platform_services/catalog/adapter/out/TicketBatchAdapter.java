@@ -60,6 +60,6 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
 
     @Override
     public Boolean hasActiveBatchesForPublication(UUID eventID, OffsetDateTime horarioDaPublicacao) {
-        return  ticketBatchRepository.existsByEventEntityId(eventID);
+        return  ticketBatchRepository.existsByEventEntityIdAndEndsAtAfter(eventID, horarioDaPublicacao);
     }
 }

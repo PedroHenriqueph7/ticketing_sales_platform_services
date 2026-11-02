@@ -9,7 +9,10 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.IllegalStateEventException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
@@ -41,6 +44,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -383,6 +387,72 @@ class EventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(batchPayload(false)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void publishEventReturnsOkWithLocationWhenSuccessful() throws Exception {
+        UUID eventId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/v1/events/{eventId}/publish", eventId))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Location", containsString("/v1/events/" + eventId)));
+
+        verify(publishEventInPort).execute(eventId);
+    }
+
+    @Test
+    void publishEventReturnsNotFoundWhenEventDoesNotExist() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new EventNotFoundException()).when(publishEventInPort).execute(eventId);
+
+        mockMvc.perform(patch("/v1/events/{eventId}/publish", eventId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Evento não encontrado"))
+                .andExpect(jsonPath("$.detail").value("Evento não encontrado no banco de dados"));
+
+        verify(publishEventInPort).execute(eventId);
+    }
+
+    @Test
+    void publishEventReturnsBadRequestWhenDomainValidationFails() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new DomainValidationException("O evento precisa de uma imagem de capa antes de ser publicado."))
+                .when(publishEventInPort).execute(eventId);
+
+        mockMvc.perform(patch("/v1/events/{eventId}/publish", eventId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Dominio invalido"))
+                .andExpect(jsonPath("$.detail").value("O evento precisa de uma imagem de capa antes de ser publicado."));
+
+        verify(publishEventInPort).execute(eventId);
+    }
+
+    @Test
+    void publishEventReturnsBadRequestWhenIllegalStateOccurs() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new IllegalStateEventException("A publicação não pode ser feita após a data de inicio do evento!"))
+                .when(publishEventInPort).execute(eventId);
+
+        mockMvc.perform(patch("/v1/events/{eventId}/publish", eventId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Estado interno do Evento invalido"))
+                .andExpect(jsonPath("$.detail").value("A publicação não pode ser feita após a data de inicio do evento!"));
+
+        verify(publishEventInPort).execute(eventId);
+    }
+
+    @Test
+    void publishEventReturnsConflictWhenEventIsAlreadyPublished() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        doThrow(new PublishedConflictException("Publicação conflitante, evento já foi publicado!"))
+                .when(publishEventInPort).execute(eventId);
+
+        mockMvc.perform(patch("/v1/events/{eventId}/publish", eventId))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflito interno na publicação"))
+                .andExpect(jsonPath("$.detail").value("Publicação conflitante, evento já foi publicado!"));
+
+        verify(publishEventInPort).execute(eventId);
     }
 
     private static String batchPayload(boolean withSeats) {

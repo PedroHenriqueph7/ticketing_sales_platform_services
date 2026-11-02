@@ -43,6 +43,7 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         log.info("Iniciando fluxo de criação de lote para o evento: eventId={}, batchName={}", eventId, ticketBatchRequest.name());
 
         EventDomain eventDomain = eventOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
+
         log.debug("Evento encontrado com sucesso: eventId={}, status={}", eventDomain.getId(), eventDomain.getStatus());
 
         validateEventAndChronology(eventDomain, ticketBatchRequest);
@@ -56,6 +57,7 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         TicketBatchDomain ticketBatch = TicketBatchMapperIn.toDomain(eventId, ticketBatchRequest);
 
         log.debug("Verificando se existe lote anterior cadastrado para o evento: eventId={}", eventId);
+
         ticketBatchOutPort.findByBatchEventId(ticketBatch.getEventId()).ifPresent(previous -> {
             if (ticketBatch.getStartsAt().isBefore(previous.getEndsAt())) {
                 log.warn("Tentativa de criar lote com data de início ({}) anterior ao fim do lote anterior ({}) para o evento: eventId={}",
@@ -67,7 +69,9 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         });
 
         log.info("Persistindo lote de ingressos: eventId={}, batchId={}, name={}", eventId, ticketBatch.getId(), ticketBatch.getName());
+
         TicketBatchDomain savedBatch = ticketBatchOutPort.save(ticketBatch);
+
         log.info("Lote de ingressos persistido com sucesso: batchId={}", savedBatch.getId());
 
         // Mapeamento DTO -> Domain de Assentos e Inserção em Lote (Bulk Insert)
