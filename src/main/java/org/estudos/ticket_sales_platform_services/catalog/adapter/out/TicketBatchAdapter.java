@@ -35,11 +35,13 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
     public TicketBatchDomain save(TicketBatchDomain batchDomain) {
 
         log.info("Persistindo lote no banco de dados com flush imediato: batchId={}, eventId={}", batchDomain.getId(), batchDomain.getEventId());
+
         EventEntity eventProxy = eventRepository.getReferenceById(batchDomain.getEventId());
 
         TicketBatchEntity entity = TicketBatchMapperOut.toEntity(batchDomain, eventProxy);
 
         TicketBatchEntity savedEntity = ticketBatchRepository.saveAndFlush(entity);
+
         log.info("Lote persistido com sucesso no banco de dados: batchId={}", savedEntity.getId());
 
         return TicketBatchMapperOut.toDomain(savedEntity);
@@ -47,19 +49,26 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
 
     @Override
     public Optional<TicketBatchDomain> findByBatchEventId(UUID eventId) {
+
         log.debug("Consultando último lote cadastrado para o evento: eventId={}", eventId);
+
         return ticketBatchRepository.findTopByEventEntityIdOrderByEndsAtDesc(eventId)
                 .map(TicketBatchMapperOut::toDomain);
     }
 
     @Override
     public Boolean existsByEventIdAndName(UUID eventId, String batchName) {
+
         log.debug("Verificando se já existe lote com nome '{}' para o evento: eventId={}", batchName, eventId);
+
         return ticketBatchRepository.existsByEventEntityIdAndName(eventId, batchName);
     }
 
     @Override
     public Boolean hasActiveBatchesForPublication(UUID eventID, OffsetDateTime horarioDaPublicacao) {
+
+        log.debug("Consultando se á lotes ativos/disponiveis para a publicação do Evento!");
+
         return  ticketBatchRepository.existsByEventEntityIdAndEndsAtAfter(eventID, horarioDaPublicacao);
     }
 }

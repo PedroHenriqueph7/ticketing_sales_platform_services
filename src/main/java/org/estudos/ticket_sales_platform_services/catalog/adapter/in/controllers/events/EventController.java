@@ -3,6 +3,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controller
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateEventControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateTicketBatchControllerDocs;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.PublishEventControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.UploadCoverImageControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
@@ -28,7 +29,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/v1/events")
-public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs, CreateTicketBatchControllerDocs {
+public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs, CreateTicketBatchControllerDocs, PublishEventControllerDocs {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
@@ -95,8 +96,11 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
         return ResponseEntity.noContent().build();
     }
 
+    @Override
     @PatchMapping("/{eventId}/publish")
     public ResponseEntity<Void> publishEvent(@PathVariable("eventId")UUID eventId) {
+
+        log.info("Recebida requisição para publicar evento: eventId={}", eventId);
 
         publishEventInPort.execute(eventId);
 
@@ -105,6 +109,8 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
                 .path("/v1/events/{id}")
                 .buildAndExpand(eventId)
                 .toUri();
+
+        log.info("Evento publicado com sucesso: eventId={}", eventId);
 
         return ResponseEntity.ok().location(location).build();
     }
