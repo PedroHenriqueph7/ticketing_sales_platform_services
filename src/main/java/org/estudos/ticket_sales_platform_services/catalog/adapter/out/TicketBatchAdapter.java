@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,7 +59,7 @@ public class TicketBatchAdapter implements TicketBatchOutPort {
     }
 
     @Override
-    public Boolean existsByEventId(UUID eventID) {
+    public Boolean hasActiveBatchesForPublication(UUID eventID, OffsetDateTime horarioDaPublicacao) {
         return  ticketBatchRepository.existsByEventEntityId(eventID);
     }
 }

@@ -104,7 +104,7 @@ public class GlobalCatalogExceptionHandler {
         log.warn("Regra de negócio violada - dominio invalido: {}", ex.getMessage());
 
         return problem(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.BAD_REQUEST,
                 "Dominio invalido",
                 ex.getMessage());
     }
@@ -114,8 +114,18 @@ public class GlobalCatalogExceptionHandler {
         log.warn("Regra de negócio violada - Estado interno do Evento invalido: {}", ex.getMessage());
 
         return problem(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.BAD_REQUEST,
                 "Estado interno do Evento invalido",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(PublishedConflictException.class)
+    public ProblemDetail handlePublishedConflictException(PublishedConflictException ex) {
+        log.warn("Regra de negócio violada - conflito na publicação: {}", ex.getMessage());
+
+        return problem(
+                HttpStatus.CONFLICT,
+                "Conflito interno na publicação",
                 ex.getMessage());
     }
 

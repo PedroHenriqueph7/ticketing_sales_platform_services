@@ -6,8 +6,8 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.IllegalStateEventException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.StorageOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.TicketBatchOutPort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -23,16 +23,20 @@ public class PublishEventUseCase implements PublishEventInPort {
     }
 
 
+    @Transactional
     @Override
     public void execute(UUID eventId) {
 
-        EventDomain eventDomain = eventOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
+        EventDomain eventDomain = eventOutPort.findByIdWithLock(eventId)
+                .orElseThrow(EventNotFoundException::new);
 
-        if (OffsetDateTime.now().isAfter(eventDomain.getStartsAt())){
+        OffsetDateTime horarioDaPublicacao = OffsetDateTime.now();
+
+        if (horarioDaPublicacao.isAfter(eventDomain.getStartsAt())){
             throw new IllegalStateEventException("A publicação não pode ser feita após a data de inicio do evento!");
         }
 
-        boolean hasBatches = ticketBatchOutPort.existsByEventId(eventId);
+        boolean hasBatches = ticketBatchOutPort.hasActiveBatchesForPublication(eventId, horarioDaPublicacao);
 
         if (!hasBatches) {
             throw new DomainValidationException("O evento deve possuir ao menos um lote de ingressos cadastrado antes da publicação.");

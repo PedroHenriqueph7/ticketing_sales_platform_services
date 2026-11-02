@@ -102,10 +102,10 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
-                .path("/api/v1/events/{id}")
+                .path("/v1/events/{id}")
                 .buildAndExpand(eventId)
                 .toUri();
 
-        return ResponseEntity.noContent().location(location).build();
+        return ResponseEntity.ok().location(location).build();
     }
 }

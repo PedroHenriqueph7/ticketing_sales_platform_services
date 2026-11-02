@@ -1,7 +1,9 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.IllegalStateEventException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
@@ -44,6 +46,8 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
         EventDomain eventDomain = eventOutPort.findByEventId(eventId).orElseThrow(EventNotFoundException::new);
 
         String oldImageUrl = eventDomain.getCoverImageUrl();
+
+        validateCanChangeCoverImage(eventDomain);
 
         String extension = getFileExtension(fileName);
         log.info("Extensão do arquivo identificado!");
@@ -93,6 +97,13 @@ public class UploadEventCoverImageUseCase implements UploadCoverImageInPort {
             } catch (Exception e) {
                 log.warn("Falha não-bloqueante ao excluir imagem anterior do S3: {}", oldImageUrl, e);
             }
+        }
+    }
+
+    private void validateCanChangeCoverImage(EventDomain eventDomain){
+
+        if(eventDomain.getStatus().equals(EventStatus.CANCELLED) || eventDomain.getStatus().equals(EventStatus.FINISHED)) {
+            throw new IllegalStateEventException("Não pode ser adicionado a capa em um evento que foi cancelado ou finalizado!!");
         }
     }
 }

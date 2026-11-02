@@ -12,4 +12,6 @@ public interface EventOutPort {
     void update(EventDomain eventDomain);
 
     Optional<EventDomain> findByEventId(UUID id);
+
+    Optional<EventDomain> findByIdWithLock(UUID eventId);
 }

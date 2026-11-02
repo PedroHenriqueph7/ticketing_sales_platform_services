@@ -51,6 +51,11 @@ public class EventAdapter implements EventOutPort {
         return repository.findById(id).map(EventMapper::toDomain);
     }
 
+    @Override
+    public Optional<EventDomain> findByIdWithLock(UUID eventId) {
+        return repository.findByIdWithLock(eventId).map(EventMapper::toDomain);
+    }
+
     @Transactional
     @Override
     public void update(EventDomain eventDomain) {

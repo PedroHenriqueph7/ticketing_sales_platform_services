@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -56,9 +57,15 @@ public class EventDomain {
     }
 
     public void publish() {
+
+        if (this.status == EventStatus.PUBLISHED) {
+            throw new PublishedConflictException("Publicação conflitante, evento já foi publicado!");
+        }
+
         if (this.status != EventStatus.DRAFT) {
             throw new DomainValidationException("Apenas eventos no estado RASCUNHO (DRAFT) podem ser publicados.");
         }
+
         if (this.coverImageUrl == null || this.coverImageUrl.isBlank()) {
             throw new DomainValidationException("O evento precisa de uma imagem de capa antes de ser publicado.");
         }
