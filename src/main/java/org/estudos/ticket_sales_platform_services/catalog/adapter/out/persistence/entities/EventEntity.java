@@ -60,4 +60,6 @@ public class EventEntity {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    @Column(name = "venue_name")
+    private String venueName;
 }

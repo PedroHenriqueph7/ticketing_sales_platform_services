@@ -29,7 +29,8 @@ public final class EventMapper {
                 domain.getAddressNumber(),
                 domain.getAddressCity(),
                 domain.getAddressNeighborhood(),
-                null
+                null,
+                domain.getVenueName()
         );
     }
 
@@ -53,7 +54,8 @@ public final class EventMapper {
                 domain.getAddressNumber(),
                 domain.getAddressCity(),
                 domain.getAddressNeighborhood(),
-                domain.getCoverImageUrl()
+                domain.getCoverImageUrl(),
+                domain.getVenueName()
         );
     }
 
@@ -77,7 +79,8 @@ public final class EventMapper {
                 entity.getAddressNumber(),
                 entity.getAddressCity(),
                 entity.getAddressNeighborhood(),
-                entity.getCoverImageUrl()
+                entity.getCoverImageUrl(),
+                entity.getVenueName()
         );
     }
 }

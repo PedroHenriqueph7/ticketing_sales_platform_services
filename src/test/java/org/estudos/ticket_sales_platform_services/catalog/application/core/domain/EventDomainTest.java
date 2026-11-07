@@ -50,7 +50,8 @@ class EventDomainTest {
                 "Av. das Nacoes",
                 "1",
                 "Rio de Janeiro",
-                "Centro"
+                "Centro",
+                "Teatro Rio"
         );
     }
 }

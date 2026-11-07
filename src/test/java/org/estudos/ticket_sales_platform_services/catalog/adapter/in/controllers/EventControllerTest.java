@@ -480,7 +480,8 @@ class EventControllerTest {
                 + "\"addressZipcode\":\"20000-000\","
                 + "\"addressStreet\":\"Av. das Nacoes\","
                 + "\"addressNumber\":\"1\","
-                + "\"addressCity\":\"Rio de Janeiro\""
+                + "\"addressCity\":\"Rio de Janeiro\","
+                + "\"venueName\":\"Parque Olimpico\""
                 + neighborhood
                 + "}";
     }

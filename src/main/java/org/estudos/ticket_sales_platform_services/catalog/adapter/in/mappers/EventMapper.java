@@ -25,7 +25,8 @@ public final class EventMapper {
                         eventRequestDTO.addressStreet(),
                         eventRequestDTO.addressNumber(),
                         eventRequestDTO.addressCity(),
-                        eventRequestDTO.addressNeighborhood()
+                        eventRequestDTO.addressNeighborhood(),
+                        eventRequestDTO.venueName()
         );
     }
 }

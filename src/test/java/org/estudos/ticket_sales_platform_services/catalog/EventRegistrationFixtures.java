@@ -24,7 +24,8 @@ public final class EventRegistrationFixtures {
                 "Av. das Nacoes",
                 "1",
                 "Rio de Janeiro",
-                "Centro"
+                "Centro",
+                "Teatro Rio"
         );
     }
     public static RegisterEventRequestDTO request(String neighborhood) {
@@ -39,7 +40,8 @@ public final class EventRegistrationFixtures {
                 "Av. das Nacoes",
                 "1",
                 "Rio de Janeiro",
-                neighborhood
+                neighborhood,
+                "Teatro Amaral"
         );
     }
 }

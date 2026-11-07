@@ -39,7 +39,10 @@ public record RegisterEventRequestDTO(
         @NotBlank(message = "Campo 'addressCity' é obrigatório! informe a cidade do evento")
         String addressCity,
 
-        String addressNeighborhood
+        String addressNeighborhood,
+        @NotBlank(message = "Nome do local é obrigatório!")
+        String venueName
+
 ) implements RegisterEventRequestDTODocs {
 }
 

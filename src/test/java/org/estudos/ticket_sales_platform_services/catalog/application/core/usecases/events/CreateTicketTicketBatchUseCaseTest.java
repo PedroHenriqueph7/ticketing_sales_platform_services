@@ -111,7 +111,8 @@ class CreateTicketTicketBatchUseCaseTest {
                 "10",
                 "SP",
                 "Centro",
-                null
+                null,
+                "Teatro Rio"
         );
         CreateTicketBatchRequestDTO request = TicketBatchFixtures.validRequestWithoutSeats();
 

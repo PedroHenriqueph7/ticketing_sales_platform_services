@@ -28,19 +28,20 @@ public class EventDomain {
     private String addressCity;
     private String addressNeighborhood;
     private String coverImageUrl;
+    private String venueName;
     
 
     // fábrica de criação
     public static EventDomain createDraft(UUID producerId, Long categoryId, String title, String description,
                                           OffsetDateTime startsAt, OffsetDateTime endsAt,
                                           String addressZipcode, String addressStreet, String addressNumber,
-                                          String addressCity, String addressNeighborhood) {
+                                          String addressCity, String addressNeighborhood, String venueName) {
 
         validateDates(startsAt, endsAt);
 
         return new EventDomain(null, producerId, categoryId, title, description, EventStatus.DRAFT,
                 startsAt, endsAt, addressZipcode, addressStreet, addressNumber, addressCity,
-                addressNeighborhood, null);
+                addressNeighborhood, null, venueName);
     }
 
     private static void validateDates(OffsetDateTime startsAt, OffsetDateTime endsAt) {

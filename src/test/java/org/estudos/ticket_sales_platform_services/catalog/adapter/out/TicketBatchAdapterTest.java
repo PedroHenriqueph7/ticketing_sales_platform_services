@@ -56,7 +56,8 @@ class TicketBatchAdapterTest {
                 "10",
                 "SP",
                 "Centro",
-                null
+                null,
+                "Teatro Rio"
         );
 
         TicketBatchEntity savedEntity = new TicketBatchEntity(

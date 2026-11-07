@@ -91,7 +91,8 @@ class PublishEventUseCaseTest {
                 "100",
                 "São Paulo",
                 "Centro",
-                "https://s3.amazonaws.com/bucket/cover.png"
+                "https://s3.amazonaws.com/bucket/cover.png",
+                "Teatro Rio"
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(pastEvent));
@@ -149,7 +150,8 @@ class PublishEventUseCaseTest {
                 "100",
                 "São Paulo",
                 "Centro",
-                "https://s3.amazonaws.com/bucket/cover.png"
+                "https://s3.amazonaws.com/bucket/cover.png",
+                "Teatro Rio"
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(publishedEvent));
@@ -184,7 +186,8 @@ class PublishEventUseCaseTest {
                 "100",
                 "São Paulo",
                 "Centro",
-                "https://s3.amazonaws.com/bucket/cover.png"
+                "https://s3.amazonaws.com/bucket/cover.png",
+                "Teatro Rio"
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(finishedEvent));
