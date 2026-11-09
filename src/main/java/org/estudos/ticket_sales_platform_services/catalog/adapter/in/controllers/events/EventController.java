@@ -6,15 +6,16 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.PublishEventControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.UploadCoverImageControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
-
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,12 +38,14 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
     private final UploadCoverImageInPort uploadCoverImageInPort;
     private final CreateTicketBatchInPort createTicketBatchInPort;
     private final PublishEventInPort publishEventInPort;
+    private final ListEventsInPort listEventsInPort;
 
-    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort, PublishEventInPort publishEventInPort1) {
+    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort, PublishEventInPort publishEventInPort1, ListEventsInPort listEventsInPort) {
         this.createEventInPort = createEventInPort;
         this.uploadCoverImageInPort = uploadCoverImageInPort;
         this.createTicketBatchInPort = createTicketBatchInPort;
         this.publishEventInPort = publishEventInPort1;
+        this.listEventsInPort = listEventsInPort;
     }
 
     @Override
@@ -114,4 +117,15 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
         return ResponseEntity.ok().location(location).build();
     }
+
+    @GetMapping
+    public ResponseEntity<Page<EventCardResponseDTO>> getCatalogEvents(
+            @RequestParam(required = false) String city,
+            @RequestParam(name = "categoryId", required = false) UUID categoryId,
+            @PageableDefault(size = 12, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable ) {
+
+        Page<EventCardResponseDTO> events = listEventsInPort.execute(city, categoryId, pageable);
+        return ResponseEntity.ok(events);
+    }
+
 }
