@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
@@ -190,6 +191,16 @@ public class GlobalCatalogExceptionHandler {
 
         problemDetail.setProperty("invalid_params", fieldErrors);
         return problemDetail;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("Tipo inválido para o parâmetro '{}'", ex.getName());
+        return problem(
+                HttpStatus.BAD_REQUEST,
+                "Dados Inválidos",
+                "Valor inválido para o parâmetro '" + ex.getName() + "'."
+        );
     }
 
     @ExceptionHandler(Exception.class)

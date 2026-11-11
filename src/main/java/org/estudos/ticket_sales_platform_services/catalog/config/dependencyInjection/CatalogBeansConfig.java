@@ -1,13 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.dependencyInjection;
 
-import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateEventUseCase;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.CreateTicketTicketBatchUseCase;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.PublishEventUseCase;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.UploadEventCoverImageUseCase;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
-import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.*;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.*;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,5 +55,14 @@ public class CatalogBeansConfig {
                 eventOutPort,
                 ticketBatchOutPort
                 );
+    }
+
+    @Bean
+    public ListEventsInPort listEventsInPort(
+            EventOutPort eventOutPort
+    ) {
+        return new ListCardEventsUseCase(
+                eventOutPort
+        );
     }
 }

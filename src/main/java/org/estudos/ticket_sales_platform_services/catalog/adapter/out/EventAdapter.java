@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
 
+import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.mappers.EventMapper;
@@ -9,6 +10,8 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.domai
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +57,12 @@ public class EventAdapter implements EventOutPort {
     @Override
     public Optional<EventDomain> findByIdWithLock(UUID eventId) {
         return repository.findByIdWithLock(eventId).map(EventMapper::toDomain);
+    }
+
+    @Override
+    public Page<EventCard> listCardEvents(String city, Long categoryId, Pageable pageable) {
+        log.debug("Consultando eventos da vitrine no banco de dados");
+        return repository.findPublishedEventsForCatalog(city, categoryId, pageable);
     }
 
     @Transactional

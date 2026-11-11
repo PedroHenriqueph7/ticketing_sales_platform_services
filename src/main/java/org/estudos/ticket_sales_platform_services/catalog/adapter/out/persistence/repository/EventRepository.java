@@ -1,7 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository;
 
 import jakarta.persistence.LockModeType;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID> {
     Optional<EventEntity> findByIdWithLock(@Param("id") UUID eventId);
 
     @Query("""
-    SELECT new org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO(
+    SELECT new org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard(
         e.id,
         e.title,
         e.coverImageUrl,
@@ -34,11 +34,11 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID> {
     WHERE e.status = 'PUBLISHED'
       AND e.endsAt > CURRENT_TIMESTAMP
       AND (:city IS NULL OR LOWER(e.addressCity) = LOWER(:city))
-      AND (:categoryId IS NULL OR e.categoryId = :categoryId)
+      AND (:categoryId IS NULL OR e.category.id = :categoryId)
 """)
-    Page<EventCardResponseDTO> findPublishedEventsForCatalog(
+    Page<EventCard> findPublishedEventsForCatalog(
             @Param("city") String city,
-            @Param("categoryId") UUID categoryId,
+            @Param("categoryId") Long categoryId,
             Pageable pageable
     );
 }
