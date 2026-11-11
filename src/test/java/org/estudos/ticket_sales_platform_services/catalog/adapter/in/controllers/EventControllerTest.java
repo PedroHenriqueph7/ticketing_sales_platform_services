@@ -4,6 +4,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions.StorageIntegrationException;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
@@ -15,6 +16,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListEventsInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling.GlobalCatalogExceptionHandler;
@@ -26,24 +28,37 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -60,6 +75,8 @@ class EventControllerTest {
     private CreateTicketBatchInPort createTicketBatchInPort;
     @Mock
     private PublishEventInPort publishEventInPort;
+    @Mock
+    private ListEventsInPort listEventsInPort;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -70,10 +87,102 @@ class EventControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort, publishEventInPort))
+        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort, publishEventInPort, listEventsInPort))
                 .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
+    }
+
+    @Test
+    void listEventsAcceptsOptionalAndValidFilters() throws Exception {
+        Long categoryId = 42L;
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class))).thenReturn(Page.empty(PageRequest.of(0, 12)));
+
+        mockMvc.perform(get("/v1/events"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/events")
+                        .param("city", "São João d'Oeste")
+                        .param("categoryId", categoryId.toString()))
+                .andExpect(status().isOk());
+
+        verify(listEventsInPort).execute(eq(null), eq(null), any(Pageable.class));
+        verify(listEventsInPort).execute(eq("São João d'Oeste"), eq(categoryId), any(Pageable.class));
+    }
+
+    @Test
+    void listEventsMapsCardsAndPreservesPagination() throws Exception {
+        UUID id = UUID.randomUUID();
+        Long categoryId = 42L;
+        OffsetDateTime startsAt = OffsetDateTime.parse("2099-01-10T20:00:00Z");
+        OffsetDateTime endsAt = OffsetDateTime.parse("2099-01-11T02:00:00Z");
+        EventCard card = new EventCard(id, "Festival", "https://example.com/cover.jpg",
+                startsAt, endsAt, "São Paulo", "Parque");
+        Pageable pageable = PageRequest.of(1, 2, Sort.by(Sort.Direction.DESC, "startsAt"));
+        when(listEventsInPort.execute("São Paulo", categoryId, pageable))
+                .thenReturn(new PageImpl<>(List.of(card), pageable, 5));
+
+        mockMvc.perform(get("/v1/events")
+                        .param("city", "São Paulo")
+                        .param("categoryId", categoryId.toString())
+                        .param("page", "1")
+                        .param("size", "2")
+                        .param("sort", "startsAt,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(id.toString()))
+                .andExpect(jsonPath("$.content[0].title").value("Festival"))
+                .andExpect(jsonPath("$.content[0].coverImageUrl").value("https://example.com/cover.jpg"))
+                .andExpect(jsonPath("$.content[0].startsAt").value("2099-01-10T20:00:00Z"))
+                .andExpect(jsonPath("$.content[0].endsAt").value("2099-01-11T02:00:00Z"))
+                .andExpect(jsonPath("$.content[0].addressCity").value("São Paulo"))
+                .andExpect(jsonPath("$.content[0].venueName").value("Parque"))
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalElements").value(5));
+
+        verify(listEventsInPort).execute("São Paulo", categoryId, pageable);
+    }
+
+    @Test
+    void listEventsRejectsInvalidCity() throws Exception {
+        for (String city : new String[]{"", "   ", "São Paulo 123", "Rio@Janeiro"}) {
+            mockMvc.perform(get("/v1/events").param("city", city))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.detail").value("Campo 'city' deve conter um nome de cidade válido."));
+        }
+        verifyNoInteractions(listEventsInPort);
+    }
+
+    @Test
+    void listEventsRejectsInvalidCategoryId() throws Exception {
+        for (String categoryId : new String[]{"invalid", "1.5", "9223372036854775808", "12345678-1234-1234-1234-123456789012"}) {
+            mockMvc.perform(get("/v1/events").param("categoryId", categoryId))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.detail").value("Valor inválido para o parâmetro 'categoryId'."))
+                    .andExpect(result -> assertInstanceOf(MethodArgumentTypeMismatchException.class, result.getResolvedException()));
+        }
+        verifyNoInteractions(listEventsInPort);
+        verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void listEventsTreatsEmptyCategoryIdAsAbsent() throws Exception {
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class))).thenReturn(Page.empty(PageRequest.of(0, 12)));
+
+        mockMvc.perform(get("/v1/events").param("categoryId", ""))
+                .andExpect(status().isOk());
+
+        verify(listEventsInPort).execute(eq(null), eq(null), any(Pageable.class));
+    }
+
+    @Test
+    void listEventsAcceptsMaximumLongCategoryId() throws Exception {
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class))).thenReturn(Page.empty(PageRequest.of(0, 12)));
+
+        mockMvc.perform(get("/v1/events").param("categoryId", Long.toString(Long.MAX_VALUE)))
+                .andExpect(status().isOk());
+
+        verify(listEventsInPort).execute(eq(null), eq(Long.MAX_VALUE), any(Pageable.class));
     }
 
     @Test

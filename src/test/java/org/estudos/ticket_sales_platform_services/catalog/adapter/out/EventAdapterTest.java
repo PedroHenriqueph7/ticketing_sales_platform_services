@@ -6,6 +6,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistenc
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.EventRepository;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -13,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -30,6 +33,17 @@ class EventAdapterTest {
     private CategoryRepository categoryRepository;
     @InjectMocks
     private EventAdapter adapter;
+
+    @Test
+    void listCardEventsDelegatesFiltersAndPagination() {
+        Long categoryId = 42L;
+        PageRequest pageable = PageRequest.of(1, 12);
+        Page<EventCard> expected = Page.empty(pageable);
+        when(eventRepository.findPublishedEventsForCatalog("São Paulo", categoryId, pageable)).thenReturn(expected);
+
+        assertSame(expected, adapter.listCardEvents("São Paulo", categoryId, pageable));
+        verify(eventRepository).findPublishedEventsForCatalog("São Paulo", categoryId, pageable);
+    }
 
     @Test
     void registerAssignsCategoryProxyPersistsAndReturnsGeneratedId() {
