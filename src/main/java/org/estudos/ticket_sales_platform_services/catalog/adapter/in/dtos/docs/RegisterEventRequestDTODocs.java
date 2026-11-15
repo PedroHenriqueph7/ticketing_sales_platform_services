@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.docs;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -21,15 +22,6 @@ public interface RegisterEventRequestDTODocs {
     OffsetDateTime startsAt();
     @Schema(description = "Data e hora de término do evento (deve ser posterior a startsAt)", example = "2027-01-11T02:00:00-03:00", requiredMode = Schema.RequiredMode.REQUIRED)
     OffsetDateTime endsAt();
-    @Schema(description = "CEP do endereço do evento", example = "20000-000", requiredMode = Schema.RequiredMode.REQUIRED)
-    String addressZipcode();
-    @Schema(description = "Rua do endereço do evento", example = "Av. Salvador Allende", requiredMode = Schema.RequiredMode.REQUIRED)
-    String addressStreet();
-    @Schema(description = "Número do endereço do evento", example = "6555", requiredMode = Schema.RequiredMode.REQUIRED)
-    String addressNumber();
-    @Schema(description = "Cidade onde ocorrerá o evento", example = "Rio de Janeiro", requiredMode = Schema.RequiredMode.REQUIRED)
-    String addressCity();
-    @Schema(description = "Bairro onde ocorrerá o evento (opcional)", example = "Barra da Tijuca")
-    String addressNeighborhood();
+    @Schema(description = "Endereço onde ocorrerá o evento", requiredMode = Schema.RequiredMode.REQUIRED)
+    RegisterEventRequestDTO.AddressRequestDTO address();
 }
-

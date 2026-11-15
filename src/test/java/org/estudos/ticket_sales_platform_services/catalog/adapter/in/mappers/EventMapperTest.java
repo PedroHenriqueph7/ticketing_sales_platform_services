@@ -16,7 +16,11 @@ class EventMapperTest {
     void toDomainCopiesFieldsAndKeepsDraft() {
         EventDomain event = EventMapper.toDomain(EventRegistrationFixtures.request("Centro"));
         assertEquals(EventStatus.DRAFT, event.getStatus());
-        assertEquals("Centro", event.getAddressNeighborhood());
+        assertEquals("20000-000", event.getAddress().zipcode());
+        assertEquals("Av. das Nacoes", event.getAddress().street());
+        assertEquals("1", event.getAddress().number());
+        assertEquals("Centro", event.getAddress().neighborhood());
+        assertEquals("Rio de Janeiro", event.getAddress().city());
         assertEquals(EventRegistrationFixtures.PRODUCER_ID, event.getProducerId());
         assertNull(event.getId());
         assertNull(event.getCoverImageUrl());
@@ -24,8 +28,8 @@ class EventMapperTest {
     @Test
     void toDomainKeepsNeighborhoodAbsent() {
         EventDomain event = EventMapper.toDomain(EventRegistrationFixtures.request(null));
-        assertNull(event.getAddressNeighborhood());
+        assertNull(event.getAddress().neighborhood());
         assertEquals(EventStatus.DRAFT, event.getStatus());
-        assertEquals("Rio de Janeiro", event.getAddressCity());
+        assertEquals("Rio de Janeiro", event.getAddress().city());
     }
 }

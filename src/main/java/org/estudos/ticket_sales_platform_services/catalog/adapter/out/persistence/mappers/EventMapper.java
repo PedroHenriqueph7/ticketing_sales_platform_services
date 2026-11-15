@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persisten
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
@@ -24,11 +25,11 @@ public final class EventMapper {
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                domain.getAddressZipcode(),
-                domain.getAddressStreet(),
-                domain.getAddressNumber(),
-                domain.getAddressCity(),
-                domain.getAddressNeighborhood(),
+                domain.getAddress().zipcode(),
+                domain.getAddress().street(),
+                domain.getAddress().number(),
+                domain.getAddress().city(),
+                domain.getAddress().neighborhood(),
                 null,
                 domain.getVenueName()
         );
@@ -49,11 +50,11 @@ public final class EventMapper {
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                domain.getAddressZipcode(),
-                domain.getAddressStreet(),
-                domain.getAddressNumber(),
-                domain.getAddressCity(),
-                domain.getAddressNeighborhood(),
+                domain.getAddress().zipcode(),
+                domain.getAddress().street(),
+                domain.getAddress().number(),
+                domain.getAddress().city(),
+                domain.getAddress().neighborhood(),
                 domain.getCoverImageUrl(),
                 domain.getVenueName()
         );
@@ -74,11 +75,13 @@ public final class EventMapper {
                 entity.getStatus(),
                 entity.getStartsAt(),
                 entity.getEndsAt(),
-                entity.getAddressZipcode(),
-                entity.getAddressStreet(),
-                entity.getAddressNumber(),
-                entity.getAddressCity(),
-                entity.getAddressNeighborhood(),
+                new Address(
+                        entity.getAddressZipcode(),
+                        entity.getAddressStreet(),
+                        entity.getAddressNumber(),
+                        entity.getAddressCity(),
+                        entity.getAddressNeighborhood()
+                ),
                 entity.getCoverImageUrl(),
                 entity.getVenueName()
         );

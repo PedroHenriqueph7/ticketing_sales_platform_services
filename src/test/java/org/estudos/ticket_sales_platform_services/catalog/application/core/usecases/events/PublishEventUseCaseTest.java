@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.usec
 
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
@@ -86,11 +87,7 @@ class PublishEventUseCaseTest {
                 EventStatus.DRAFT,
                 OffsetDateTime.now().minusHours(2), // Início no passado
                 OffsetDateTime.now().plusHours(2),
-                "01001-000",
-                "Rua Teste",
-                "100",
-                "São Paulo",
-                "Centro",
+                new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
                 "Teatro Rio"
         );
@@ -145,11 +142,7 @@ class PublishEventUseCaseTest {
                 EventStatus.PUBLISHED, // Já publicado
                 OffsetDateTime.now().plusDays(5),
                 OffsetDateTime.now().plusDays(6),
-                "01001-000",
-                "Rua Teste",
-                "100",
-                "São Paulo",
-                "Centro",
+                new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
                 "Teatro Rio"
         );
@@ -181,11 +174,7 @@ class PublishEventUseCaseTest {
                 EventStatus.FINISHED,
                 OffsetDateTime.now().plusDays(5),
                 OffsetDateTime.now().plusDays(6),
-                "01001-000",
-                "Rua Teste",
-                "100",
-                "São Paulo",
-                "Centro",
+                new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
                 "Teatro Rio"
         );

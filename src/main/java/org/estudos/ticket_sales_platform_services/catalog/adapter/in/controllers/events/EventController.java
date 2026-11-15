@@ -136,8 +136,10 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
         log.info("Recebida requisição de listagem da vitrine: filtroCidade={}, filtroCategoria={}, page={}, size={}, sort={}",
                 city != null, categoryId != null, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
         Page<EventCardResponseDTO> events = listEventsInPort.execute(
                 city, categoryId, pageable).map(EventMapper::toCardResponse);
+
         log.info("Listagem da vitrine concluída: page={}, itensRetornados={}, totalItens={}",
                 events.getNumber(), events.getNumberOfElements(), events.getTotalElements());
         return ResponseEntity.ok(events);

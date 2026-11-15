@@ -46,7 +46,7 @@ public class SeatPersistenceAdapter implements SaveSeatsOutPort {
                     SeatDomain seat = batchChunk.get(i);
                     ps.setObject(1, seat.getId()); // UUIDv7 gerado na aplicação
                     ps.setObject(2, seat.getTicketBatchId());
-                    ps.setString(3, seat.getCode());
+                    ps.setString(3, seat.getCode().code());
                     ps.setString(4, seat.getStatus().name());
                 }
 

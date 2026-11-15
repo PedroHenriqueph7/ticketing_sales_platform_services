@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
@@ -35,11 +36,13 @@ public final class EventMapper {
                         eventRequestDTO.description(),
                         eventRequestDTO.startsAt(),
                         eventRequestDTO.endsAt(),
-                        eventRequestDTO.addressZipcode(),
-                        eventRequestDTO.addressStreet(),
-                        eventRequestDTO.addressNumber(),
-                        eventRequestDTO.addressCity(),
-                        eventRequestDTO.addressNeighborhood(),
+                        new Address(
+                                eventRequestDTO.address().zipcode(),
+                                eventRequestDTO.address().street(),
+                                eventRequestDTO.address().number(),
+                                eventRequestDTO.address().city(),
+                                eventRequestDTO.address().neighborhood()
+                        ),
                         eventRequestDTO.venueName()
         );
     }

@@ -21,6 +21,7 @@ class EventDomainTest {
         assertEquals(EventRegistrationFixtures.PRODUCER_ID, event.getProducerId());
         assertEquals(EventRegistrationFixtures.CATEGORY_ID, event.getCategoryId());
         assertEquals("Rock in Rio", event.getTitle());
+        assertEquals("Rio de Janeiro", event.getAddress().city());
         assertEquals(STARTS_AT, event.getStartsAt());
         assertEquals(ENDS_AT, event.getEndsAt());
     }
@@ -46,11 +47,7 @@ class EventDomainTest {
                 "Festival",
                 startsAt,
                 endsAt,
-                "20000-000",
-                "Av. das Nacoes",
-                "1",
-                "Rio de Janeiro",
-                "Centro",
+                new Address("20000-000", "Av. das Nacoes", "1", "Rio de Janeiro", "Centro"),
                 "Teatro Rio"
         );
     }

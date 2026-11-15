@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -20,11 +21,7 @@ public final class EventRegistrationFixtures {
                 "Festival",
                 STARTS_AT,
                 ENDS_AT,
-                "20000-000",
-                "Av. das Nacoes",
-                "1",
-                "Rio de Janeiro",
-                "Centro",
+                new Address("20000-000", "Av. das Nacoes", "1", "Rio de Janeiro", "Centro"),
                 "Teatro Rio"
         );
     }
@@ -36,11 +33,13 @@ public final class EventRegistrationFixtures {
                 "Festival",
                 STARTS_AT,
                 ENDS_AT,
-                "20000-000",
-                "Av. das Nacoes",
-                "1",
-                "Rio de Janeiro",
-                neighborhood,
+                new RegisterEventRequestDTO.AddressRequestDTO(
+                        "20000-000",
+                        "Av. das Nacoes",
+                        "1",
+                        "Rio de Janeiro",
+                        neighborhood
+                ),
                 "Teatro Amaral"
         );
     }

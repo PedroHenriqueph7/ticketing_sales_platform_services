@@ -6,6 +6,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.domai
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.SeatDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.objectsvalue.Code;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
@@ -78,7 +79,7 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         if (ticketBatchRequest.hasSeats()) {
             log.info("Mapeando e persistindo {} assentos para o lote: batchId={}", ticketBatchRequest.seats().size(), savedBatch.getId());
             List<SeatDomain> seats = ticketBatchRequest.seats().stream()
-                    .map(seatDto -> new SeatDomain(savedBatch.getId(), seatDto.code()))
+                    .map(seatDto -> new SeatDomain(savedBatch.getId(), new Code(seatDto.code())))
                     .toList();
 
             saveSeatsOutPort.saveAllInBatches(seats);

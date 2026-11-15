@@ -143,7 +143,7 @@ class UploadEventCoverImageUseCaseTest {
 
         // Assert
         verify(eventOutPort).findByEventId(eventId);
-        verifyNoInteractions(storageOutPort, eventOutPort);
+        verifyNoInteractions(storageOutPort);
     }
 
     @Test

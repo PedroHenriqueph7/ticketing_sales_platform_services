@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -26,7 +27,10 @@ public class TicketBatchDomain {
         this.id = UuidCreator.getTimeOrderedEpoch();
         this.eventId = eventId;
         this.name = name;
+
+        validatePrice(price);
         this.price = price;
+
         this.capacity = capacity;
         this.availableQuantity = capacity;
         validateDates(startsAt, endsAt);
@@ -39,6 +43,8 @@ public class TicketBatchDomain {
         this.id = id;
         this.eventId = eventId;
         this.name = name;
+
+        validatePrice(price);
         this.price = price;
         this.capacity = capacity;
         this.availableQuantity = availableQuantity;
@@ -50,6 +56,17 @@ public class TicketBatchDomain {
         if (!startsAt.isBefore(endsAt)) {
             throw new EventValidationException(
                     "A data de início do lote deve ser anterior a data de encerramento.");
+        }
+    }
+
+    private static void validatePrice(BigDecimal price) {
+
+        if (price == null) {
+            throw new InputObjectInvalidException("O preço do lote é obrigatório.");
+        }
+
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InputObjectInvalidException("O Preço do lote não pode ser negativo!");
         }
     }
 }

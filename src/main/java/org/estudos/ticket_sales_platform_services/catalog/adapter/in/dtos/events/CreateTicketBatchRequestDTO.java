@@ -45,6 +45,7 @@ public record CreateTicketBatchRequestDTO(
                 @Schema(description = "Código identificador do assento", example = "A-01", requiredMode = Schema.RequiredMode.REQUIRED)
                 @NotBlank(message = "O código do assento não pode ser vazio.")
                 @Size(max = 20, message = "O código do assento não pode exceder 20 caracteres.")
+                @Pattern(regexp = "[A-Za-z0-9_-]+", message = "O código deve conter apenas letras, números, hífen ou underscore")
                 String code
         ) {}
 }

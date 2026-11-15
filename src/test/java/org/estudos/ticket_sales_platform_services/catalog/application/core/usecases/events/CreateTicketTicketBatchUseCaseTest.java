@@ -5,6 +5,7 @@ import org.estudos.ticket_sales_platform_services.catalog.TicketBatchFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO.SeatRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
@@ -106,11 +107,7 @@ class CreateTicketTicketBatchUseCaseTest {
                 EventStatus.FINISHED,
                 EventRegistrationFixtures.STARTS_AT,
                 EventRegistrationFixtures.ENDS_AT,
-                "01001000",
-                "Rua A",
-                "10",
-                "SP",
-                "Centro",
+                new Address("01001000", "Rua A", "10", "SP", "Centro"),
                 null,
                 "Teatro Rio"
         );

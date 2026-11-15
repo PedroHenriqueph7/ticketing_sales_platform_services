@@ -206,8 +206,19 @@ class EventControllerTest {
                 .andExpect(status().isCreated());
         ArgumentCaptor<EventDomain> captor = ArgumentCaptor.forClass(EventDomain.class);
         verify(createEventInPort).execute(captor.capture());
-        assertNull(captor.getValue().getAddressNeighborhood());
+        assertNull(captor.getValue().getAddress().neighborhood());
     }
+
+    @Test
+    void createEventValidatesNestedAddressFields() throws Exception {
+        mockMvc.perform(post("/v1/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload(true).replace("\"zipcode\":\"20000-000\"", "\"zipcode\":\" \"")))
+                .andExpect(status().isBadRequest());
+
+        verify(createEventInPort, never()).execute(any());
+    }
+
     @Test
     void createEventReturnsBadRequestWhenTitleIsBlank() throws Exception {
         mockMvc.perform(post("/v1/events")
@@ -578,7 +589,7 @@ class EventControllerTest {
     }
 
     private static String payload(boolean includeNeighborhood) {
-        String neighborhood = includeNeighborhood ? ",\"addressNeighborhood\":\"Centro\"" : "";
+        String neighborhood = includeNeighborhood ? ",\"neighborhood\":\"Centro\"" : "";
         return "{"
                 + "\"categoryId\":" + EventRegistrationFixtures.CATEGORY_ID + ","
                 + "\"producerId\":\"" + EventRegistrationFixtures.PRODUCER_ID + "\","
@@ -586,12 +597,14 @@ class EventControllerTest {
                 + "\"description\":\"Festival\","
                 + "\"startsAt\":\"2099-01-10T20:00:00-03:00\","
                 + "\"endsAt\":\"2099-01-11T02:00:00-03:00\","
-                + "\"addressZipcode\":\"20000-000\","
-                + "\"addressStreet\":\"Av. das Nacoes\","
-                + "\"addressNumber\":\"1\","
-                + "\"addressCity\":\"Rio de Janeiro\","
-                + "\"venueName\":\"Parque Olimpico\""
+                + "\"address\":{"
+                + "\"zipcode\":\"20000-000\","
+                + "\"street\":\"Av. das Nacoes\","
+                + "\"number\":\"1\","
+                + "\"city\":\"Rio de Janeiro\""
                 + neighborhood
+                + "},"
+                + "\"venueName\":\"Parque Olimpico\""
                 + "}";
     }
 }
