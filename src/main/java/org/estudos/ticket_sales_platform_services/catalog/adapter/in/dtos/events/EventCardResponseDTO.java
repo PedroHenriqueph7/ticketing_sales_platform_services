@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.OffsetDateTime;
@@ -17,7 +18,8 @@ public record EventCardResponseDTO(
         OffsetDateTime startsAt,
         @Schema(description = "Data e hora de encerramento com offset", example = "2099-01-11T02:00:00-03:00")
         OffsetDateTime endsAt,
-        @Schema(description = "Cidade do evento", example = "São Paulo")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Schema(description = "Cidade do evento; omitida quando o filtro de cidade é informado", example = "São Paulo")
         String addressCity,
         @Schema(description = "Nome do local", example = "Parque Villa Lobos")
         String venueName

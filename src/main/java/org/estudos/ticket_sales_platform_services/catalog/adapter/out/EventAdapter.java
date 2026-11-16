@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -62,7 +63,8 @@ public class EventAdapter implements EventOutPort {
     @Override
     public Page<EventCard> listCardEvents(String city, Long categoryId, Pageable pageable) {
         log.debug("Consultando eventos da vitrine no banco de dados");
-        return repository.findPublishedEventsForCatalog(city, categoryId, pageable);
+        String normalizedCity = city == null ? null : city.toLowerCase(Locale.ROOT);
+        return repository.findPublishedEventsForCatalog(normalizedCity, categoryId, pageable);
     }
 
     @Transactional

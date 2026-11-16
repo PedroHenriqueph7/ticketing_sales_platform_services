@@ -46,6 +46,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.aMapWithSize;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,13 +136,56 @@ class EventControllerTest {
                 .andExpect(jsonPath("$.content[0].coverImageUrl").value("https://example.com/cover.jpg"))
                 .andExpect(jsonPath("$.content[0].startsAt").value("2099-01-10T20:00:00Z"))
                 .andExpect(jsonPath("$.content[0].endsAt").value("2099-01-11T02:00:00Z"))
-                .andExpect(jsonPath("$.content[0].addressCity").value("São Paulo"))
+                .andExpect(jsonPath("$.content[0].addressCity").doesNotHaveJsonPath())
                 .andExpect(jsonPath("$.content[0].venueName").value("Parque"))
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.totalElements").value(5));
+                .andExpect(jsonPath("$", aMapWithSize(2)))
+                .andExpect(jsonPath("$.page", aMapWithSize(4)))
+                .andExpect(jsonPath("$.page.number").value(1))
+                .andExpect(jsonPath("$.page.size").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(3))
+                .andExpect(jsonPath("$.number").doesNotHaveJsonPath())
+                .andExpect(jsonPath("$.pageable").doesNotHaveJsonPath());
 
         verify(listEventsInPort).execute("São Paulo", categoryId, pageable);
+    }
+
+    @Test
+    void listEventsReturnsPaginationMetadataForEmptyAndFinalPages() throws Exception {
+        EventCard card = new EventCard(UUID.randomUUID(), "Festival", null,
+                OffsetDateTime.parse("2099-01-10T20:00:00Z"),
+                OffsetDateTime.parse("2099-01-11T02:00:00Z"), "São Paulo", "Parque");
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class)))
+                .thenReturn(Page.empty(PageRequest.of(0, 2)))
+                .thenReturn(new PageImpl<>(List.of(card, card), PageRequest.of(0, 2), 5))
+                .thenReturn(new PageImpl<>(List.of(card), PageRequest.of(2, 2), 5))
+                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(3, 2), 5));
+
+        mockMvc.perform(get("/v1/events").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.size").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(0))
+                .andExpect(jsonPath("$.page.totalPages").value(0));
+        mockMvc.perform(get("/v1/events").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
+        mockMvc.perform(get("/v1/events").param("page", "2").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.page.number").value(2))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
+        mockMvc.perform(get("/v1/events").param("page", "3").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.page.number").value(3))
+                .andExpect(jsonPath("$.page.totalElements").value(5))
+                .andExpect(jsonPath("$.page.totalPages").value(3));
     }
 
     @Test

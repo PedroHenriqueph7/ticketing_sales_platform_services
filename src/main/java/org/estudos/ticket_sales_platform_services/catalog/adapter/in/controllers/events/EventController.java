@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -125,7 +126,7 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<EventCardResponseDTO>> getCatalogEvents(
+    public ResponseEntity<PagedModel<EventCardResponseDTO>> getCatalogEvents(
             @RequestParam(required = false) String city,
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @PageableDefault(size = 12, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable ) {
@@ -138,11 +139,11 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
                 city != null, categoryId != null, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
         Page<EventCardResponseDTO> events = listEventsInPort.execute(
-                city, categoryId, pageable).map(EventMapper::toCardResponse);
+                city, categoryId, pageable).map(event -> EventMapper.toCardResponse(event, city == null));
 
         log.info("Listagem da vitrine concluída: page={}, itensRetornados={}, totalItens={}",
                 events.getNumber(), events.getNumberOfElements(), events.getTotalElements());
-        return ResponseEntity.ok(events);
+        return ResponseEntity.ok(new PagedModel<>(events));
     }
 
 }

@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Events", description = "Operações relacionadas ao cadastro e gerenciamento de eventos")
@@ -20,7 +20,10 @@ public interface ListEventsControllerDocs {
             summary = "Listar eventos da vitrine",
             description = "Endpoint público que retorna uma página de cards de eventos publicados e ainda não encerrados. " +
                     "Os filtros de cidade e categoria são opcionais e, quando combinados, ambos são aplicados. " +
-                    "A comparação da cidade ignora maiúsculas e minúsculas.",
+                    "A comparação da cidade ignora maiúsculas e minúsculas. " +
+                    "O campo addressCity é omitido dos cards quando o filtro de cidade é informado. " +
+                    "Os metadados de paginação são retornados em page; há próxima página quando " +
+                    "page.number + 1 é menor que page.totalPages.",
             parameters = {
                     @Parameter(name = "page", in = ParameterIn.QUERY, description = "Índice da página, começando em zero",
                             schema = @Schema(type = "integer", defaultValue = "0", minimum = "0")),
@@ -37,7 +40,7 @@ public interface ListEventsControllerDocs {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor",
                     content = @Content(mediaType = "application/problem+json"))
     })
-    ResponseEntity<Page<EventCardResponseDTO>> getCatalogEvents(
+    ResponseEntity<PagedModel<EventCardResponseDTO>> getCatalogEvents(
             @Parameter(description = "Cidade do evento; comparação sem distinção entre maiúsculas e minúsculas",
                     example = "São Paulo")
             String city,

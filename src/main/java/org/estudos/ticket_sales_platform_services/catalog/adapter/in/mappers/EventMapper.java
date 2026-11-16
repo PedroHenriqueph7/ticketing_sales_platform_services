@@ -11,14 +11,14 @@ public final class EventMapper {
 
     private EventMapper(){}
 
-    public static EventCardResponseDTO toCardResponse(EventCard event) {
+    public static EventCardResponseDTO toCardResponse(EventCard event, boolean includeCity) {
         return new EventCardResponseDTO(
                 event.id(),
                 event.title(),
                 event.coverImageUrl(),
                 event.startsAt(),
                 event.endsAt(),
-                event.addressCity(),
+                includeCity ? event.addressCity() : null,
                 event.venueName()
         );
     }

@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.EventController;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListEventsInPort;
@@ -16,7 +17,17 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.containsString;
@@ -48,6 +59,8 @@ class ListEventsOpenApiTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.paths['/v1/events'].get.summary").value("Listar eventos da vitrine"))
+                .andExpect(jsonPath("$.paths['/v1/events'].get.description",
+                        containsString("O campo addressCity é omitido")))
                 .andExpect(jsonPath("$.paths['/v1/events'].get.parameters", hasSize(5)))
                 .andExpect(jsonPath("$.paths['/v1/events'].get.parameters[*].name",
                         hasItem("city")))
@@ -66,9 +79,39 @@ class ListEventsOpenApiTest {
                         hasItem("startsAt,asc")))
                 .andExpect(jsonPath("$.paths['/v1/events'].get.responses['200']").exists())
                 .andExpect(jsonPath("$.paths['/v1/events'].get.responses['200'].content['*/*'].schema['$ref']",
-                        containsString("PageEventCardResponseDTO")))
+                        containsString("PagedModelEventCardResponseDTO")))
                 .andExpect(jsonPath("$.paths['/v1/events'].get.responses['400']").exists())
+                .andExpect(jsonPath("$.components.schemas.PagedModelEventCardResponseDTO.properties.content").exists())
+                .andExpect(jsonPath("$.components.schemas.PagedModelEventCardResponseDTO.properties.page").exists())
+                .andExpect(jsonPath("$.components.schemas.PageMetadata.properties.number").exists())
+                .andExpect(jsonPath("$.components.schemas.PageMetadata.properties.size").exists())
+                .andExpect(jsonPath("$.components.schemas.PageMetadata.properties.totalElements").exists())
+                .andExpect(jsonPath("$.components.schemas.PageMetadata.properties.totalPages").exists())
                 .andExpect(jsonPath("$.components.schemas.EventCardResponseDTO.properties.coverImageUrl").exists())
                 .andExpect(jsonPath("$.components.schemas.EventCardResponseDTO.properties.startsAt").exists());
+    }
+
+    @Test
+    void includesCityOnlyWhenCityFilterIsAbsent() throws Exception {
+        EventCard card = new EventCard(UUID.randomUUID(), "Festival", null,
+                OffsetDateTime.parse("2099-01-10T20:00:00Z"),
+                OffsetDateTime.parse("2099-01-11T02:00:00Z"), "São Paulo", "Parque");
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(card), PageRequest.of(0, 12), 1));
+
+        mockMvc.perform(get("/v1/events"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].addressCity").value("São Paulo"))
+                .andExpect(jsonPath("$.content[0].venueName").value("Parque"));
+        mockMvc.perform(get("/v1/events").param("categoryId", "42"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].addressCity").value("São Paulo"));
+        mockMvc.perform(get("/v1/events").param("city", "são paulo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].addressCity").doesNotHaveJsonPath())
+                .andExpect(jsonPath("$.content[0].venueName").value("Parque"));
+        mockMvc.perform(get("/v1/events").param("city", "São Paulo").param("categoryId", "42"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].addressCity").doesNotHaveJsonPath());
     }
 }

@@ -41,10 +41,10 @@ class EventAdapterTest {
         Long categoryId = 42L;
         PageRequest pageable = PageRequest.of(1, 12);
         Page<EventCard> expected = Page.empty(pageable);
-        when(eventRepository.findPublishedEventsForCatalog("São Paulo", categoryId, pageable)).thenReturn(expected);
+        when(eventRepository.findPublishedEventsForCatalog("são paulo", categoryId, pageable)).thenReturn(expected);
 
         assertSame(expected, adapter.listCardEvents("São Paulo", categoryId, pageable));
-        verify(eventRepository).findPublishedEventsForCatalog("São Paulo", categoryId, pageable);
+        verify(eventRepository).findPublishedEventsForCatalog("são paulo", categoryId, pageable);
     }
 
     @Test
