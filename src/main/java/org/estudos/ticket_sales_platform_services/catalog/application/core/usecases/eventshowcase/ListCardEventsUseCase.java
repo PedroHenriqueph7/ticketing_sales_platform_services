@@ -1,4 +1,4 @@
-package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events;
+package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.eventshowcase;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListEventsInPort;

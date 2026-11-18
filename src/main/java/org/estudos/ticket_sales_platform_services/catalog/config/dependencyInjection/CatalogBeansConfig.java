@@ -1,10 +1,14 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.dependencyInjection;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events.*;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.eventshowcase.ListCardEventsUseCase;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.eventshowcase.ListEventsBannerUsecase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.*;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
 
 @Configuration
 public class CatalogBeansConfig {
@@ -64,5 +68,12 @@ public class CatalogBeansConfig {
         return new ListCardEventsUseCase(
                 eventOutPort
         );
+    }
+
+    @Bean
+    public ListActiveEventBannersInPort listActiveEventBannersInPort(
+            Clock clock, EventBannerOutPort eventBannerOutPort
+    ) {
+        return new ListEventsBannerUsecase(clock, eventBannerOutPort);
     }
 }

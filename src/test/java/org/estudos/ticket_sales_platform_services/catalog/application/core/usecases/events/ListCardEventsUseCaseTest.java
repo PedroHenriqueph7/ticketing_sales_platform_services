@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.events;
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.eventshowcase.ListCardEventsUseCase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

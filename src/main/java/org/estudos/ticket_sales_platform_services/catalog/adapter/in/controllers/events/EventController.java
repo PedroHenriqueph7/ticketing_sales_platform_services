@@ -3,22 +3,14 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controller
 import jakarta.validation.Valid;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateEventControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.CreateTicketBatchControllerDocs;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.ListEventsControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.PublishEventControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.docs.UploadCoverImageControllerDocs;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
-import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers.EventMapper;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,28 +22,23 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping(value = "/v1/events")
-public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs, CreateTicketBatchControllerDocs, PublishEventControllerDocs, ListEventsControllerDocs {
+public class EventController implements CreateEventControllerDocs, UploadCoverImageControllerDocs, CreateTicketBatchControllerDocs, PublishEventControllerDocs{
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
-
-    private static final Pattern CITY_PATTERN = Pattern.compile("\\p{L}[\\p{L}\\p{M}]*(?:[ .'-]+\\p{L}[\\p{L}\\p{M}]*)*");
 
     private final CreateEventInPort createEventInPort;
     private final UploadCoverImageInPort uploadCoverImageInPort;
     private final CreateTicketBatchInPort createTicketBatchInPort;
     private final PublishEventInPort publishEventInPort;
-    private final ListEventsInPort listEventsInPort;
 
-    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort, PublishEventInPort publishEventInPort1, ListEventsInPort listEventsInPort) {
+    public EventController(CreateEventInPort createEventInPort, UploadCoverImageInPort uploadCoverImageInPort, CreateTicketBatchInPort createTicketBatchInPort, PublishEventInPort publishEventInPort1) {
         this.createEventInPort = createEventInPort;
         this.uploadCoverImageInPort = uploadCoverImageInPort;
         this.createTicketBatchInPort = createTicketBatchInPort;
         this.publishEventInPort = publishEventInPort1;
-        this.listEventsInPort = listEventsInPort;
     }
 
     @Override
@@ -123,27 +110,4 @@ public class EventController implements CreateEventControllerDocs, UploadCoverIm
 
         return ResponseEntity.ok().location(location).build();
     }
-
-    @Override
-    @GetMapping
-    public ResponseEntity<PagedModel<EventCardResponseDTO>> getCatalogEvents(
-            @RequestParam(required = false) String city,
-            @RequestParam(name = "categoryId", required = false) Long categoryId,
-            @PageableDefault(size = 12, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable ) {
-
-        if (city != null && !CITY_PATTERN.matcher(city).matches()) {
-            throw new InputObjectInvalidException("Campo 'city' deve conter um nome de cidade válido.");
-        }
-
-        log.info("Recebida requisição de listagem da vitrine: filtroCidade={}, filtroCategoria={}, page={}, size={}, sort={}",
-                city != null, categoryId != null, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        Page<EventCardResponseDTO> events = listEventsInPort.execute(
-                city, categoryId, pageable).map(event -> EventMapper.toCardResponse(event, city == null));
-
-        log.info("Listagem da vitrine concluída: page={}, itensRetornados={}, totalItens={}",
-                events.getNumber(), events.getNumberOfElements(), events.getTotalElements());
-        return ResponseEntity.ok(new PagedModel<>(events));
-    }
-
 }

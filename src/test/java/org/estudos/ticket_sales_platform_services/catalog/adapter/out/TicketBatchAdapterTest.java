@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
 
 import org.estudos.ticket_sales_platform_services.catalog.TicketBatchFixtures;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.TicketBatchAdapter;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.TicketBatchEntity;

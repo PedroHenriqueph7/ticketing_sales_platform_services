@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.EventAdapter;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.CategoryRepository;

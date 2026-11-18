@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 
-@Tag(name = "Events", description = "Operações relacionadas ao cadastro e gerenciamento de eventos")
+@Tag(name = "Events", description = "Operações relacionadas a listagem e a visualização de eventos")
 public interface ListEventsControllerDocs {
 
     @Operation(

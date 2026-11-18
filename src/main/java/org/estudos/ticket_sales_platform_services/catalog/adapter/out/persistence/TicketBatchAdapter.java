@@ -1,4 +1,4 @@
-package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
+package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.TicketBatchEntity;

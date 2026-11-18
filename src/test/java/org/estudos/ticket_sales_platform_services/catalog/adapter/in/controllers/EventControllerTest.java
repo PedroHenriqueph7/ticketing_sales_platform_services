@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.EventController;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.in.controllers.events.EventsShowcaseController;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.exceptions.StorageIntegrationException;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
@@ -16,6 +17,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
+import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListActiveEventBannersInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListEventsInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
@@ -79,6 +81,8 @@ class EventControllerTest {
     private PublishEventInPort publishEventInPort;
     @Mock
     private ListEventsInPort listEventsInPort;
+    @Mock
+    private ListActiveEventBannersInPort listActiveEventBannersInPort;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -89,7 +93,9 @@ class EventControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
         validator.afterPropertiesSet();
-        mockMvc = MockMvcBuilders.standaloneSetup(new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort, publishEventInPort, listEventsInPort))
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                        new EventController(createEventInPort, uploadCoverImageInPort, createTicketBatchInPort, publishEventInPort),
+                        new EventsShowcaseController(listActiveEventBannersInPort, listEventsInPort))
                 .setControllerAdvice(new GlobalCatalogExceptionHandler(eventPublisher))
                 .setValidator(validator)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -110,6 +116,16 @@ class EventControllerTest {
 
         verify(listEventsInPort).execute(eq(null), eq(null), any(Pageable.class));
         verify(listEventsInPort).execute(eq("São João d'Oeste"), eq(categoryId), any(Pageable.class));
+    }
+
+    @Test
+    void listEventsUsesDefaultPaginationAndSort() throws Exception {
+        when(listEventsInPort.execute(nullable(String.class), nullable(Long.class), any(Pageable.class)))
+                .thenReturn(Page.empty(PageRequest.of(0, 12)));
+
+        mockMvc.perform(get("/v1/events")).andExpect(status().isOk());
+
+        verify(listEventsInPort).execute(null, null, PageRequest.of(0, 12, Sort.by("startsAt").ascending()));
     }
 
     @Test
