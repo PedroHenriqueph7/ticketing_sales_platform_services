@@ -3,6 +3,8 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persisten
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.projections.EventBannerProjection;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.EventBannerRepository;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventBannerOutPort;
+import org.estudos.ticket_sales_platform_services.catalog.config.cacheconfig.RedisCacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +22,9 @@ public class EventsBannerAdapter implements EventBannerOutPort {
         this.bannerRepository = bannerRepository;
     }
 
+
     @Override
+    @Cacheable(value = RedisCacheConfig.ACTIVE_BANNERS_CACHE, key = "'global'", sync = true)
     public List<BannerAvailability> findActiveBanners(Instant now) {
         return bannerRepository.findActiveBanners(OffsetDateTime.ofInstant(now, ZoneOffset.UTC), PageRequest.of(0, 5))
                 .stream()
