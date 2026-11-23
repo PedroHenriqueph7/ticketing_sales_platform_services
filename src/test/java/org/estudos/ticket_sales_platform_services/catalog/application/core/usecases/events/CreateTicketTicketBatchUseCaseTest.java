@@ -5,7 +5,7 @@ import org.estudos.ticket_sales_platform_services.catalog.TicketBatchFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.CreateTicketBatchRequestDTO.SeatRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;

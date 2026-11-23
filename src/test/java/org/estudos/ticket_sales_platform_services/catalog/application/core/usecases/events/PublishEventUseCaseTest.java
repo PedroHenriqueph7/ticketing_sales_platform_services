@@ -2,7 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.usec
 
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;

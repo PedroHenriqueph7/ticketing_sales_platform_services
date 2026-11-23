@@ -2,7 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.in.mappers;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;

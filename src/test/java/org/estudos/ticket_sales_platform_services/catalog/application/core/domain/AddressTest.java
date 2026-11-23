@@ -1,5 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.domain;
 
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

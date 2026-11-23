@@ -2,7 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persisten
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 

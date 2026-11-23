@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 
 import lombok.Getter;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;

@@ -1,6 +1,6 @@
 package org.estudos.ticket_sales_platform_services.catalog;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

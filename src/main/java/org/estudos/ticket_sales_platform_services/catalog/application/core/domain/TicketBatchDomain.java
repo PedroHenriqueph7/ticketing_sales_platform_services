@@ -3,12 +3,16 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchDepletedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
 
 @NoArgsConstructor
 @Getter
@@ -22,6 +26,7 @@ public class TicketBatchDomain {
     private int availableQuantity;
     private OffsetDateTime startsAt;
     private OffsetDateTime endsAt;
+    private final List<Object> domainEvents = new ArrayList<>();
 
     public TicketBatchDomain(UUID eventId, String name, BigDecimal price, int capacity, OffsetDateTime startsAt, OffsetDateTime endsAt) {
         this.id = UuidCreator.getTimeOrderedEpoch();
@@ -68,5 +73,47 @@ public class TicketBatchDomain {
         if (price.compareTo(BigDecimal.ZERO) < 0) {
             throw new InputObjectInvalidException("O Preço do lote não pode ser negativo!");
         }
+    }
+
+    public void reserve(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("A quantidade deve ser maior que zero");
+        }
+        if (this.availableQuantity < quantity) {
+            throw new IllegalStateException("Ingressos insuficientes no lote");
+        }
+
+        final Integer RESERVATION_LIMIT_PER_USER = 4;
+        if (quantity > RESERVATION_LIMIT_PER_USER) {
+            throw new IllegalArgumentException("A quantidade de reserva por usuário não pode exceder " + RESERVATION_LIMIT_PER_USER);
+        }
+
+        boolean hadStockBefore = this.availableQuantity > 0;
+        this.availableQuantity -= quantity;
+
+        // Transição de borda: tinha estoque (> 0) e agora zerou (== 0)
+        if (hadStockBefore && this.availableQuantity == 0) {
+            this.domainEvents.add(new TicketBatchDepletedEvent(this.eventId, this.id));
+        }
+    }
+
+    public void release(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("A quantidade de devolução deve ser maior que zero");
+        }
+
+        boolean wasDepletedBefore = this.availableQuantity == 0;
+        this.availableQuantity += quantity;
+
+        // Transição de borda: estava esgotado (== 0) e voltou a ter estoque (> 0)
+        if (wasDepletedBefore && this.availableQuantity > 0) {
+            this.domainEvents.add(new TicketBatchDepletedEvent(this.eventId, this.id));
+        }
+    }
+
+    public List<Object> pullDomainEvents() {
+        List<Object> events = List.copyOf(this.domainEvents);
+        this.domainEvents.clear();
+        return events;
     }
 }

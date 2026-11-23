@@ -1,6 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.application.core.domain;
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;

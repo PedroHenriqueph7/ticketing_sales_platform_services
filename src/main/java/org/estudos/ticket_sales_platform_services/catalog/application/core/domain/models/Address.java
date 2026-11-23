@@ -1,4 +1,4 @@
-package org.estudos.ticket_sales_platform_services.catalog.application.core.domain;
+package org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models;
 
 public record Address(
         String zipcode,
