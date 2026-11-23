@@ -5,6 +5,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.useca
 import org.estudos.ticket_sales_platform_services.catalog.application.core.usecases.eventshowcase.ListEventsBannerUsecase;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.*;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -41,12 +42,14 @@ public class CatalogBeansConfig {
     public CreateTicketBatchInPort createTicketBatchInPort(
             TicketBatchOutPort ticketBatchOutPort,
             SaveSeatsOutPort saveSeatsOutPort,
-            EventOutPort eventOutPort
+            EventOutPort eventOutPort,
+            ApplicationEventPublisher eventPublisher
     ) {
         return new CreateTicketTicketBatchUseCase(
                 ticketBatchOutPort,
                 saveSeatsOutPort,
-                eventOutPort);
+                eventOutPort,
+                eventPublisher);
     }
 
     @Bean

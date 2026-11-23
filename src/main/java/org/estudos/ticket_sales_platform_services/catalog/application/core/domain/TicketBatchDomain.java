@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchDepletedEvent;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchUpdatedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
@@ -55,6 +56,8 @@ public class TicketBatchDomain {
         this.availableQuantity = availableQuantity;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
+
+        this.domainEvents.add(new TicketBatchUpdatedEvent(this.eventId, this.id));
     }
 
     private static void validateDates(OffsetDateTime startsAt, OffsetDateTime endsAt) {
@@ -110,6 +113,7 @@ public class TicketBatchDomain {
             this.domainEvents.add(new TicketBatchDepletedEvent(this.eventId, this.id));
         }
     }
+
 
     public List<Object> pullDomainEvents() {
         List<Object> events = List.copyOf(this.domainEvents);

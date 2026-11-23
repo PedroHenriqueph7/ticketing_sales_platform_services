@@ -15,6 +15,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.TicketBatchOutPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -30,11 +31,14 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
     private final SaveSeatsOutPort saveSeatsOutPort;
     private final EventOutPort eventOutPort;
 
+    private final ApplicationEventPublisher eventPublisher;
 
-    public CreateTicketTicketBatchUseCase(TicketBatchOutPort ticketBatchOutPort, SaveSeatsOutPort saveSeatsOutPort, EventOutPort eventOutPort) {
+
+    public CreateTicketTicketBatchUseCase(TicketBatchOutPort ticketBatchOutPort, SaveSeatsOutPort saveSeatsOutPort, EventOutPort eventOutPort, ApplicationEventPublisher eventPublisher) {
         this.ticketBatchOutPort = ticketBatchOutPort;
         this.eventOutPort = eventOutPort;
         this.saveSeatsOutPort = saveSeatsOutPort;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -87,6 +91,8 @@ public class CreateTicketTicketBatchUseCase implements CreateTicketBatchInPort {
         }
 
         log.info("Fluxo de criação do lote de ingressos concluído com sucesso: eventId={}, batchId={}", eventId, savedBatch.getId());
+
+        ticketBatch.pullDomainEvents().forEach(eventPublisher::publishEvent);
     }
 
     private void validateEventAndChronology(EventDomain event, CreateTicketBatchRequestDTO dto) {

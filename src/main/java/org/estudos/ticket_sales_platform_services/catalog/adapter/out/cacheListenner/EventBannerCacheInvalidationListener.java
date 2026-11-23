@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out.cacheList
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchDepletedEvent;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchUpdatedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.config.cacheconfig.RedisCacheConfig;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
