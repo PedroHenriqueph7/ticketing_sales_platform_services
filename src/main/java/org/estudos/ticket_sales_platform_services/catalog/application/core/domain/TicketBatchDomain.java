@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchDepletedEvent;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchReplenishedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchUpdatedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
@@ -43,6 +44,8 @@ public class TicketBatchDomain {
 
         this.startsAt = startsAt;
         this.endsAt = endsAt;
+
+        this.domainEvents.add(new TicketBatchUpdatedEvent(this.eventId, this.id));
     }
 
     public TicketBatchDomain(UUID id, UUID eventId, String name, BigDecimal price, int capacity, int availableQuantity, OffsetDateTime startsAt, OffsetDateTime endsAt) {
@@ -57,7 +60,6 @@ public class TicketBatchDomain {
         this.startsAt = startsAt;
         this.endsAt = endsAt;
 
-        this.domainEvents.add(new TicketBatchUpdatedEvent(this.eventId, this.id));
     }
 
     private static void validateDates(OffsetDateTime startsAt, OffsetDateTime endsAt) {
@@ -110,7 +112,7 @@ public class TicketBatchDomain {
 
         // Transição de borda: estava esgotado (== 0) e voltou a ter estoque (> 0)
         if (wasDepletedBefore && this.availableQuantity > 0) {
-            this.domainEvents.add(new TicketBatchDepletedEvent(this.eventId, this.id));
+            this.domainEvents.add(new TicketBatchReplenishedEvent(this.eventId, this.id));
         }
     }
 

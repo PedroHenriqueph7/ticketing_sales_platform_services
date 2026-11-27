@@ -8,6 +8,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.domai
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchUpdatedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.EventNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -41,6 +43,9 @@ class CreateTicketTicketBatchUseCaseTest {
     @Mock
     private EventOutPort eventOutPort;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private CreateTicketTicketBatchUseCase useCase;
 
@@ -61,6 +66,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         verify(ticketBatchOutPort).save(any(TicketBatchDomain.class));
         verify(saveSeatsOutPort, never()).saveAllInBatches(any());
+        verify(eventPublisher).publishEvent(argThat((TicketBatchUpdatedEvent batchEvent) ->
+                batchEvent.eventId().equals(eventId)));
     }
 
     @Test
@@ -80,6 +87,8 @@ class CreateTicketTicketBatchUseCaseTest {
 
         verify(ticketBatchOutPort).save(any(TicketBatchDomain.class));
         verify(saveSeatsOutPort).saveAllInBatches(argThat(seats -> seats.size() == 3));
+        verify(eventPublisher).publishEvent(argThat((TicketBatchUpdatedEvent batchEvent) ->
+                batchEvent.eventId().equals(eventId)));
     }
 
     @Test
@@ -92,6 +101,7 @@ class CreateTicketTicketBatchUseCaseTest {
 
         assertThrows(EventNotFoundException.class, () -> useCase.execute(eventId, request));
         verifyNoInteractions(ticketBatchOutPort, saveSeatsOutPort);
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test

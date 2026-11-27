@@ -1,7 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out.cacheListenner;
 
-import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.TicketBatchDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchDepletedEvent;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchReplenishedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.TicketBatchUpdatedEvent;
 import org.estudos.ticket_sales_platform_services.catalog.config.cacheconfig.RedisCacheConfig;
 import org.springframework.cache.Cache;
@@ -29,10 +29,15 @@ public class EventBannerCacheInvalidationListener {
         evictActiveBannersCache();
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onBatchReplenished(TicketBatchReplenishedEvent event) {
+        evictActiveBannersCache();
+    }
+
     private void evictActiveBannersCache() {
         Cache cache = cacheManager.getCache(RedisCacheConfig.ACTIVE_BANNERS_CACHE);
         if (cache != null) {
-            cache.clear();
+            cache.evictIfPresent("global");
         }
     }
 }
