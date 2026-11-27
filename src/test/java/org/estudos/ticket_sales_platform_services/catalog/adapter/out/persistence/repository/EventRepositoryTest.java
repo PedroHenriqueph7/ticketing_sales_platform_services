@@ -1,6 +1,12 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository;
 
 import jakarta.persistence.EntityManager;
+import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.mappers.EventMapper;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.projections.EventBannerProjection;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.EventsBannerAdapter;
@@ -68,9 +74,9 @@ class EventRepositoryTest {
         UUID id = UUID.randomUUID();
         entityManager.createNativeQuery("""
                 INSERT INTO tb_event (id, producer_id, category_id, title, description, status,
-                    starts_at, ends_at, address_street, address_city, venue_name, cover_image_url)
+                    starts_at, ends_at, address_zipcode, address_street, address_number, address_city, venue_name, cover_image_url)
                 VALUES (:id, :producerId, :categoryId, 'Festival', 'Descrição', :status,
-                    CAST(:startsAt AS timestamptz), CAST(:endsAt AS timestamptz), 'Rua', :city, 'Parque', 'https://example.com/cover.jpg')
+                    CAST(:startsAt AS timestamptz), CAST(:endsAt AS timestamptz), '01001-000', 'Rua', '1', :city, 'Parque', 'https://example.com/cover.jpg')
                 """)
                 .setParameter("id", id)
                 .setParameter("producerId", UUID.randomUUID())
@@ -91,6 +97,33 @@ class EventRepositoryTest {
         assertEquals(1, page.getTotalElements());
         assertEquals(firstEvent, page.getContent().getFirst().id());
         assertEquals("São Paulo", page.getContent().getFirst().addressCity());
+    }
+
+    @Test
+    void persistsAndReloadsPoliciesWithOptionalRulesMissing() {
+        EventDomain draft = EventDomain.createDraft(EventRegistrationFixtures.PRODUCER_ID, 10L, "Festival",
+                "Descricao", EventRegistrationFixtures.STARTS_AT, EventRegistrationFixtures.ENDS_AT,
+                EventRegistrationFixtures.validDraft().getAddress(), "Local", new EventPolicies("16 anos", "Detalhes", null, null));
+        EventEntity entity = repository.saveAndFlush(EventMapper.toNewEntity(draft, entityManager.getReference(CategoryEntity.class, 10L)));
+        UUID id = entity.getId();
+        entityManager.clear();
+
+        EventDomain reloaded = EventMapper.toDomain(repository.findById(id).orElseThrow());
+        assertEquals(draft.getAddress(), reloaded.getAddress());
+        assertEquals(draft.getEventPolicies(), reloaded.getEventPolicies());
+    }
+
+    @Test
+    void legacyEventWithoutPoliciesCanBeUpdated() {
+        EventDomain legacy = EventMapper.toDomain(repository.findById(firstEvent).orElseThrow());
+        assertNull(legacy.getEventPolicies());
+        legacy.updateCoverImage("https://example.com/new-cover.jpg");
+        repository.saveAndFlush(EventMapper.toExistingEntity(legacy, entityManager.getReference(CategoryEntity.class, 10L)));
+        entityManager.clear();
+
+        EventDomain reloaded = EventMapper.toDomain(repository.findById(firstEvent).orElseThrow());
+        assertNull(reloaded.getEventPolicies());
+        assertEquals("https://example.com/new-cover.jpg", reloaded.getCoverImageUrl());
     }
 
     @Test

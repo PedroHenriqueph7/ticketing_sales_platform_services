@@ -2,6 +2,8 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 import org.estudos.ticket_sales_platform_services.catalog.EventRegistrationFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
@@ -40,6 +42,21 @@ class EventDomainTest {
         assertThrows(InvalidDateException.class, () -> draft(ENDS_AT, STARTS_AT));
     }
 
+    @Test
+    void createDraftRejectsMissingOrInvalidPolicies() {
+        for (EventPolicies policies : new EventPolicies[]{
+                null,
+                new EventPolicies(null, "Detalhes", null, null),
+                new EventPolicies("16 anos", " ", null, null),
+                new EventPolicies("a".repeat(31), "Detalhes", null, null)
+        }) {
+            assertThrows(DomainValidationException.class, () -> EventDomain.createDraft(
+                    EventRegistrationFixtures.PRODUCER_ID, EventRegistrationFixtures.CATEGORY_ID,
+                    "Evento", "Descricao", STARTS_AT, ENDS_AT,
+                    new Address("20000-000", "Rua", "1", "Rio", null), "Local", policies));
+        }
+    }
+
     private static EventDomain draft(OffsetDateTime startsAt, OffsetDateTime endsAt) {
         return EventDomain.createDraft(
                 EventRegistrationFixtures.PRODUCER_ID,
@@ -49,7 +66,8 @@ class EventDomainTest {
                 startsAt,
                 endsAt,
                 new Address("20000-000", "Av. das Nacoes", "1", "Rio de Janeiro", "Centro"),
-                "Teatro Rio"
+                "Teatro Rio",
+                EventRegistrationFixtures.POLICIES
         );
     }
 }

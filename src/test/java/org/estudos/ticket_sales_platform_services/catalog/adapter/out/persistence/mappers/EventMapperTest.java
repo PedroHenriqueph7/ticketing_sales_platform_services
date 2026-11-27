@@ -34,11 +34,15 @@ class EventMapperTest {
         assertEquals(EventStatus.DRAFT, entity.getStatus());
         assertEquals(domain.getProducerId(), entity.getProducerId());
         assertEquals(domain.getTitle(), entity.getTitle());
-        assertEquals(domain.getAddress().zipcode(), entity.getAddressZipcode());
-        assertEquals(domain.getAddress().street(), entity.getAddressStreet());
-        assertEquals(domain.getAddress().number(), entity.getAddressNumber());
-        assertEquals(domain.getAddress().city(), entity.getAddressCity());
-        assertEquals(domain.getAddress().neighborhood(), entity.getAddressNeighborhood());
+        assertEquals(domain.getAddress().zipcode(), entity.getAddress().getAddressZipcode());
+        assertEquals(domain.getAddress().street(), entity.getAddress().getAddressStreet());
+        assertEquals(domain.getAddress().number(), entity.getAddress().getAddressNumber());
+        assertEquals(domain.getAddress().city(), entity.getAddress().getAddressCity());
+        assertEquals(domain.getAddress().neighborhood(), entity.getAddress().getAddressNeighborhood());
+        assertEquals(domain.getEventPolicies().ageRating(), entity.getPolicies().getAgeRating());
+        assertEquals(domain.getEventPolicies().ageRatingDetails(), entity.getPolicies().getAgeRatingDetails());
+        assertEquals(domain.getEventPolicies().halfPriceRules(), entity.getPolicies().getHalfPriceRules());
+        assertEquals(domain.getEventPolicies().validationRules(), entity.getPolicies().getValidationRules());
         assertEquals(domain.getStartsAt(), entity.getStartsAt());
         assertEquals(domain.getEndsAt(), entity.getEndsAt());
     }
@@ -53,5 +57,23 @@ class EventMapperTest {
         EventDomain mappedDomain = EventMapper.toDomain(entity);
 
         assertEquals(domain.getAddress(), mappedDomain.getAddress());
+        assertEquals(domain.getEventPolicies(), mappedDomain.getEventPolicies());
+    }
+
+    @Test
+    void existingEventWithoutPoliciesCanBeReadAndUpdated() {
+        EventDomain draft = EventRegistrationFixtures.validDraft();
+        EventDomain legacy = new EventDomain(UUID.randomUUID(), draft.getProducerId(), draft.getCategoryId(),
+                draft.getTitle(), draft.getDescription(), draft.getStatus(), draft.getStartsAt(), draft.getEndsAt(),
+                draft.getAddress(), "cover", draft.getVenueName(), null);
+        CategoryEntity category = mock(CategoryEntity.class);
+        when(category.getId()).thenReturn(EventRegistrationFixtures.CATEGORY_ID);
+
+        EventEntity entity = EventMapper.toExistingEntity(legacy, category);
+        assertNull(entity.getPolicies());
+        EventDomain mapped = EventMapper.toDomain(entity);
+        assertNull(mapped.getEventPolicies());
+        assertEquals("cover", mapped.getCoverImageUrl());
+        assertNull(EventMapper.toExistingEntity(mapped, category).getPolicies());
     }
 }

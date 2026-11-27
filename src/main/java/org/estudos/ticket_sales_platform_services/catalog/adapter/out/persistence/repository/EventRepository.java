@@ -27,13 +27,13 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID> {
         e.coverImageUrl,
         e.startsAt,
         e.endsAt,
-        e.addressCity,
+        e.address.addressCity,
         e.venueName
     )
     FROM EventEntity e
     WHERE e.status = 'PUBLISHED'
       AND e.endsAt > CURRENT_TIMESTAMP
-      AND (:city IS NULL OR LOWER(e.addressCity) = :city)
+      AND (:city IS NULL OR LOWER(e.address.addressCity) = :city)
       AND (:categoryId IS NULL OR e.category.id = :categoryId)
 """)
     Page<EventCard> findPublishedEventsForCatalog(

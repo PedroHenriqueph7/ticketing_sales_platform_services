@@ -13,6 +13,14 @@ class EventMapperTest {
         assertThrows(InputObjectInvalidException.class, () -> EventMapper.toDomain(null));
     }
     @Test
+    void toDomainRejectsMissingPolicies() {
+        var request = EventRegistrationFixtures.request("Centro");
+        var missingPolicies = new org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO(
+                request.producerId(), request.categoryId(), request.title(), request.description(),
+                request.startsAt(), request.endsAt(), request.address(), request.venueName(), null);
+        assertThrows(InputObjectInvalidException.class, () -> EventMapper.toDomain(missingPolicies));
+    }
+    @Test
     void toDomainCopiesFieldsAndKeepsDraft() {
         EventDomain event = EventMapper.toDomain(EventRegistrationFixtures.request("Centro"));
         assertEquals(EventStatus.DRAFT, event.getStatus());
@@ -22,6 +30,7 @@ class EventMapperTest {
         assertEquals("Centro", event.getAddress().neighborhood());
         assertEquals("Rio de Janeiro", event.getAddress().city());
         assertEquals(EventRegistrationFixtures.PRODUCER_ID, event.getProducerId());
+        assertEquals(EventRegistrationFixtures.POLICIES, event.getEventPolicies());
         assertNull(event.getId());
         assertNull(event.getCoverImageUrl());
     }

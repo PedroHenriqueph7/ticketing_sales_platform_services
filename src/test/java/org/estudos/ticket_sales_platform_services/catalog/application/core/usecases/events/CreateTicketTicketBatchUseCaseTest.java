@@ -119,7 +119,8 @@ class CreateTicketTicketBatchUseCaseTest {
                 EventRegistrationFixtures.ENDS_AT,
                 new Address("01001000", "Rua A", "10", "SP", "Centro"),
                 null,
-                "Teatro Rio"
+                "Teatro Rio",
+                EventRegistrationFixtures.POLICIES
         );
         CreateTicketBatchRequestDTO request = TicketBatchFixtures.validRequestWithoutSeats();
 

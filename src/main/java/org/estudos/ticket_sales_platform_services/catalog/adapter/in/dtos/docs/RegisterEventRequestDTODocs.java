@@ -24,4 +24,8 @@ public interface RegisterEventRequestDTODocs {
     OffsetDateTime endsAt();
     @Schema(description = "Endereço onde ocorrerá o evento", requiredMode = Schema.RequiredMode.REQUIRED)
     RegisterEventRequestDTO.AddressRequestDTO address();
+    @Schema(description = "Nome do local do evento", requiredMode = Schema.RequiredMode.REQUIRED)
+    String venueName();
+    @Schema(description = "Políticas do evento", requiredMode = Schema.RequiredMode.REQUIRED)
+    RegisterEventRequestDTO.EventPoliciesRequestDTO policies();
 }

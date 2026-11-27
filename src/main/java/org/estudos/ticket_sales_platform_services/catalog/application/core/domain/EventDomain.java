@@ -3,6 +3,7 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.doma
 import lombok.Getter;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.enums.EventStatus;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.DomainValidationException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
@@ -24,10 +25,11 @@ public class EventDomain {
     private final Address address;
     private String coverImageUrl;
     private final String venueName;
+    private final EventPolicies eventPolicies;
 
     public EventDomain(UUID id, UUID producerId, Long categoryId, String title, String description,
                        EventStatus status, OffsetDateTime startsAt, OffsetDateTime endsAt,
-                       Address address, String coverImageUrl, String venueName) {
+                       Address address, String coverImageUrl, String venueName, EventPolicies eventPolicies) {
         this.id = id;
         this.producerId = producerId;
         this.categoryId = categoryId;
@@ -39,15 +41,27 @@ public class EventDomain {
         this.address = requireAddress(address);
         this.coverImageUrl = coverImageUrl;
         this.venueName = venueName;
+        this.eventPolicies = eventPolicies;
     }
 
     public static EventDomain createDraft(UUID producerId, Long categoryId, String title, String description,
                                           OffsetDateTime startsAt, OffsetDateTime endsAt,
-                                          Address address, String venueName) {
+                                          Address address, String venueName,  EventPolicies eventPolicies) {
         validateDates(startsAt, endsAt);
+        validatePolicies(eventPolicies);
 
         return new EventDomain(null, producerId, categoryId, title, description, EventStatus.DRAFT,
-                startsAt, endsAt, address, null, venueName);
+                startsAt, endsAt, address, null, venueName,  eventPolicies);
+    }
+
+    private static void validatePolicies(EventPolicies policies) {
+        if (policies == null || policies.ageRating() == null || policies.ageRating().isBlank()
+                || policies.ageRatingDetails() == null || policies.ageRatingDetails().isBlank()) {
+            throw new DomainValidationException("A classificação indicativa e seus detalhes são obrigatórios.");
+        }
+        if (policies.ageRating().length() > 30) {
+            throw new DomainValidationException("A classificação indicativa deve ter no máximo 30 caracteres.");
+        }
     }
 
     private static Address requireAddress(Address address) {

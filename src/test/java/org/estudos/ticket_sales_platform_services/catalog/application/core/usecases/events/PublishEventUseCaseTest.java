@@ -89,7 +89,8 @@ class PublishEventUseCaseTest {
                 OffsetDateTime.now().plusHours(2),
                 new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
-                "Teatro Rio"
+                "Teatro Rio",
+                EventRegistrationFixtures.POLICIES
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(pastEvent));
@@ -144,7 +145,8 @@ class PublishEventUseCaseTest {
                 OffsetDateTime.now().plusDays(6),
                 new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
-                "Teatro Rio"
+                "Teatro Rio",
+                EventRegistrationFixtures.POLICIES
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(publishedEvent));
@@ -176,7 +178,8 @@ class PublishEventUseCaseTest {
                 OffsetDateTime.now().plusDays(6),
                 new Address("01001-000", "Rua Teste", "100", "São Paulo", "Centro"),
                 "https://s3.amazonaws.com/bucket/cover.png",
-                "Teatro Rio"
+                "Teatro Rio",
+                EventRegistrationFixtures.POLICIES
         );
 
         when(eventOutPort.findByIdWithLock(eventId)).thenReturn(Optional.of(finishedEvent));

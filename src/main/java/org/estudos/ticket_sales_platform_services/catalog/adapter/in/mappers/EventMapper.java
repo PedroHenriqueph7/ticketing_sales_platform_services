@@ -4,6 +4,7 @@ import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.EventCardResponseDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.models.EventCard;
 
@@ -28,6 +29,9 @@ public final class EventMapper {
         if (eventRequestDTO == null) {
             throw new InputObjectInvalidException("Null event registration payload");
         }
+        if (eventRequestDTO.address() == null || eventRequestDTO.policies() == null) {
+            throw new InputObjectInvalidException("Event address and policies are required");
+        }
 
         return EventDomain.createDraft(
                         eventRequestDTO.producerId(),
@@ -43,7 +47,13 @@ public final class EventMapper {
                                 eventRequestDTO.address().city(),
                                 eventRequestDTO.address().neighborhood()
                         ),
-                        eventRequestDTO.venueName()
+                        eventRequestDTO.venueName(),
+                        new EventPolicies(
+                                eventRequestDTO.policies().ageRating(),
+                                eventRequestDTO.policies().ageRatingDetails(),
+                                eventRequestDTO.policies().halfPriceRules(),
+                                eventRequestDTO.policies().validationRules()
+                        )
         );
     }
 }
