@@ -3,6 +3,7 @@ package org.estudos.ticket_sales_platform_services.catalog.adapter.out;
 import org.estudos.ticket_sales_platform_services.catalog.TicketBatchFixtures;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.TicketBatchAdapter;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.AddressEmbeddable;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.TicketBatchEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.repository.EventRepository;
@@ -52,13 +53,10 @@ class TicketBatchAdapterTest {
                 EventStatus.DRAFT,
                 OffsetDateTime.now().plusDays(10),
                 OffsetDateTime.now().plusDays(11),
-                "01001000",
-                "Rua A",
-                "10",
-                "SP",
-                "Centro",
+                new AddressEmbeddable("01001000", "Rua A", "10", "SP", "Centro"),
                 null,
-                "Teatro Rio"
+                "Teatro Rio",
+                null
         );
 
         TicketBatchEntity savedEntity = new TicketBatchEntity(

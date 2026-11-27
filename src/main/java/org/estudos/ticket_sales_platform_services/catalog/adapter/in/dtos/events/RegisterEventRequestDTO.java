@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.docs.RegisterEventRequestDTODocs;
 
 import java.time.OffsetDateTime;
@@ -34,7 +35,11 @@ public record RegisterEventRequestDTO(
         AddressRequestDTO address,
 
         @NotBlank(message = "Nome do local é obrigatório!")
-        String venueName
+        String venueName,
+
+        @NotNull(message = "Campo policies é obrigatório!")
+        @Valid
+        EventPoliciesRequestDTO policies
 
 ) implements RegisterEventRequestDTODocs {
 
@@ -59,4 +64,20 @@ public record RegisterEventRequestDTO(
             String neighborhood
     ) {
     }
+
+    public record EventPoliciesRequestDTO(
+
+            @Schema(description = "Classificação indicativa do evento", example = "16 anos", requiredMode = Schema.RequiredMode.REQUIRED, maxLength = 30)
+            @NotBlank(message = "Campo da Classificação de Idade é obrigatório")
+            @Size(max = 30, message = "A classificação de idade deve ter no máximo 30 caracteres")
+            String ageRating,
+
+            @Schema(description = "Detalhes da classificação indicativa", requiredMode = Schema.RequiredMode.REQUIRED)
+            @NotBlank(message = "Campo dos Detalhes da Classificação de Idade é obrigatório")
+            String ageRatingDetails,
+            @Schema(description = "Regras de meia-entrada, quando aplicáveis")
+            String halfPriceRules,
+            @Schema(description = "Regras de validação na entrada, quando aplicáveis")
+            String validationRules
+    ) {}
 }

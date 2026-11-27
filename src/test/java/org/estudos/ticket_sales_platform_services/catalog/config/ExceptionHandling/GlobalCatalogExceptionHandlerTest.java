@@ -1,10 +1,7 @@
 package org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling;
 
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.loggerSqs.dto.ExecutionLogEvent;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ImageExtensionNotAllowedException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
-import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InvalidDateException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.*;
 import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +44,7 @@ class GlobalCatalogExceptionHandlerTest {
 
     @Test
     void mapsProducerNotFoundToNotFound() {
-        ProblemDetail detail = handler.handleProducerNotFoundException(new UserNotFoundException());
+        ProblemDetail detail = handler.handleProducerNotFoundException(new ProducerNotFoundException());
 
         assertEquals(HttpStatus.NOT_FOUND.value(), detail.getStatus());
         assertEquals("Produtora não encontrada", detail.getTitle());

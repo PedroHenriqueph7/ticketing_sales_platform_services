@@ -15,6 +15,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.excep
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.IllegalStateEventException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.PublishedConflictException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ProducerNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateTicketBatchInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.ListActiveEventBannersInPort;
@@ -22,7 +23,6 @@ import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.L
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.PublishEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.UploadCoverImageInPort;
 import org.estudos.ticket_sales_platform_services.catalog.config.ExceptionHandling.GlobalCatalogExceptionHandler;
-import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +50,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.aMapWithSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -271,6 +272,36 @@ class EventControllerTest {
     }
 
     @Test
+    void createEventMapsPoliciesAndAcceptsMissingOptionalRules() throws Exception {
+        when(createEventInPort.execute(any(EventDomain.class))).thenReturn(UUID.randomUUID());
+        mockMvc.perform(post("/v1/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload(true).replace(",\"halfPriceRules\":\"Meia-entrada\",\"validationRules\":\"Documento\"", "")))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<EventDomain> captor = ArgumentCaptor.forClass(EventDomain.class);
+        verify(createEventInPort).execute(captor.capture());
+        assertEquals("16 anos", captor.getValue().getEventPolicies().ageRating());
+        assertEquals("Com responsavel", captor.getValue().getEventPolicies().ageRatingDetails());
+        assertNull(captor.getValue().getEventPolicies().halfPriceRules());
+        assertNull(captor.getValue().getEventPolicies().validationRules());
+    }
+
+    @Test
+    void createEventRejectsInvalidPolicies() throws Exception {
+        for (String invalidPayload : List.of(
+                payload(true).replace(",\"policies\":{\"ageRating\":\"16 anos\",\"ageRatingDetails\":\"Com responsavel\","
+                        + "\"halfPriceRules\":\"Meia-entrada\",\"validationRules\":\"Documento\"}", ""),
+                payload(true).replace("\"ageRating\":\"16 anos\"", "\"ageRating\":\" \""),
+                payload(true).replace("\"ageRatingDetails\":\"Com responsavel\"", "\"ageRatingDetails\":\" \""),
+                payload(true).replace("\"ageRating\":\"16 anos\"", "\"ageRating\":\"" + "a".repeat(31) + "\""))) {
+            mockMvc.perform(post("/v1/events").contentType(MediaType.APPLICATION_JSON).content(invalidPayload))
+                    .andExpect(status().isBadRequest());
+        }
+        verify(createEventInPort, never()).execute(any());
+    }
+
+    @Test
     void createEventValidatesNestedAddressFields() throws Exception {
         mockMvc.perform(post("/v1/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -310,7 +341,7 @@ class EventControllerTest {
     }
     @Test
     void createEventReturnsNotFoundWhenProducerDoesNotExist() throws Exception {
-        when(createEventInPort.execute(any(EventDomain.class))).thenThrow(new UserNotFoundException());
+        when(createEventInPort.execute(any(EventDomain.class))).thenThrow(new ProducerNotFoundException());
         mockMvc.perform(post("/v1/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload(true)))
@@ -665,7 +696,9 @@ class EventControllerTest {
                 + "\"city\":\"Rio de Janeiro\""
                 + neighborhood
                 + "},"
-                + "\"venueName\":\"Parque Olimpico\""
+                + "\"venueName\":\"Parque Olimpico\","
+                + "\"policies\":{\"ageRating\":\"16 anos\",\"ageRatingDetails\":\"Com responsavel\","
+                + "\"halfPriceRules\":\"Meia-entrada\",\"validationRules\":\"Documento\"}"
                 + "}";
     }
 }

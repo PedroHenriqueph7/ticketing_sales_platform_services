@@ -26,7 +26,7 @@ public class EventEntity {
     @Column(name = "producer_id", nullable = false)
     private UUID producerId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
@@ -46,20 +46,16 @@ public class EventEntity {
     @Column(name = "ends_at", nullable = false)
     private OffsetDateTime endsAt;
 
-    @Column(name = "address_zipcode")
-    private String addressZipcode;
-    @Column(name = "address_street", nullable = false)
-    private String addressStreet;
-    @Column(name = "address_number")
-    private String addressNumber;
-    @Column(name = "address_city", nullable = false)
-    private String addressCity;
-    @Column(name = "address_neighborhood")
-    private String addressNeighborhood;
+    @Embedded
+    private AddressEmbeddable address;
 
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
     @Column(name = "venue_name")
     private String venueName;
+
+    @Embedded
+    private EventPoliciesEmbeddable policies;
+
 }

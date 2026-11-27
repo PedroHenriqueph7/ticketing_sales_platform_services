@@ -2,12 +2,12 @@ package org.estudos.ticket_sales_platform_services.catalog.application.core.usec
 
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.CategoryNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ProducerNotFoundException;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.utils.ValidationObject;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.in.CreateEventInPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CategoryIdOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CheckProducerExistsOutPort;
-import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class CreateEventUseCase implements CreateEventInPort {
 
         if(!checkProducerExistsOutPort.existsByProducerId(event.getProducerId())) {
             log.warn("Produtor não encontrado: producerId={}", event.getProducerId());
-            throw new UserNotFoundException();
+            throw new ProducerNotFoundException();
         }
         log.debug("Produtor validado com sucesso: producerId={}", event.getProducerId());
 

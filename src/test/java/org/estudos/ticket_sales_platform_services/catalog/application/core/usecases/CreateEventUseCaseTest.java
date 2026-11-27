@@ -7,7 +7,7 @@ import org.estudos.ticket_sales_platform_services.catalog.application.core.useca
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CheckProducerExistsOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.EventOutPort;
 import org.estudos.ticket_sales_platform_services.catalog.application.ports.out.CategoryIdOutPort;
-import org.estudos.ticket_sales_platform_services.identity.application.core.exceptions.UserNotFoundException;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.ProducerNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -64,7 +64,7 @@ class CreateEventUseCaseTest {
         when(categoryIdOutPort.existsByCategoryId(event.getCategoryId())).thenReturn(true);
         when(checkProducerExistsOutPort.existsByProducerId(event.getProducerId())).thenReturn(false);
 
-        assertThrows(UserNotFoundException.class, () -> useCase.execute(event));
+        assertThrows(ProducerNotFoundException.class, () -> useCase.execute(event));
         verify(eventOutPort, never()).register(event);
     }
     @Test

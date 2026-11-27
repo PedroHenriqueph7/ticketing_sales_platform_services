@@ -141,8 +141,8 @@ public class GlobalCatalogExceptionHandler {
         );
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ProblemDetail handleProducerNotFoundException(UserNotFoundException ex) {
+    @ExceptionHandler(ProducerNotFoundException.class)
+    public ProblemDetail handleProducerNotFoundException(ProducerNotFoundException ex) {
         log.warn("Regra de negócio violada - produtora não encontrada: {}", ex.getMessage());
 
         return problem(

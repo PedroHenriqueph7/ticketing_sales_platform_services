@@ -1,9 +1,12 @@
 package org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.mappers;
 
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.AddressEmbeddable;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.CategoryEntity;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventEntity;
+import org.estudos.ticket_sales_platform_services.catalog.adapter.out.persistence.entities.EventPoliciesEmbeddable;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.exceptions.InputObjectInvalidException;
 
 public final class EventMapper {
@@ -25,13 +28,16 @@ public final class EventMapper {
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                domain.getAddress().zipcode(),
-                domain.getAddress().street(),
-                domain.getAddress().number(),
-                domain.getAddress().city(),
-                domain.getAddress().neighborhood(),
+                new AddressEmbeddable(
+                        domain.getAddress().zipcode(),
+                        domain.getAddress().street(),
+                        domain.getAddress().number(),
+                        domain.getAddress().city(),
+                        domain.getAddress().neighborhood()
+                ),
                 null,
-                domain.getVenueName()
+                domain.getVenueName(),
+                toPoliciesEmbeddable(domain.getEventPolicies())
         );
     }
 
@@ -50,13 +56,16 @@ public final class EventMapper {
                 domain.getStatus(),
                 domain.getStartsAt(),
                 domain.getEndsAt(),
-                domain.getAddress().zipcode(),
-                domain.getAddress().street(),
-                domain.getAddress().number(),
-                domain.getAddress().city(),
-                domain.getAddress().neighborhood(),
+                new AddressEmbeddable(
+                        domain.getAddress().zipcode(),
+                        domain.getAddress().street(),
+                        domain.getAddress().number(),
+                        domain.getAddress().city(),
+                        domain.getAddress().neighborhood()
+                ),
                 domain.getCoverImageUrl(),
-                domain.getVenueName()
+                domain.getVenueName(),
+                toPoliciesEmbeddable(domain.getEventPolicies())
         );
     }
 
@@ -76,14 +85,26 @@ public final class EventMapper {
                 entity.getStartsAt(),
                 entity.getEndsAt(),
                 new Address(
-                        entity.getAddressZipcode(),
-                        entity.getAddressStreet(),
-                        entity.getAddressNumber(),
-                        entity.getAddressCity(),
-                        entity.getAddressNeighborhood()
+                        entity.getAddress().getAddressZipcode(),
+                        entity.getAddress().getAddressStreet(),
+                        entity.getAddress().getAddressNumber(),
+                        entity.getAddress().getAddressCity(),
+                        entity.getAddress().getAddressNeighborhood()
                 ),
                 entity.getCoverImageUrl(),
-                entity.getVenueName()
+                entity.getVenueName(),
+                toPolicies(entity.getPolicies())
         );
+    }
+
+    private static EventPoliciesEmbeddable toPoliciesEmbeddable(EventPolicies policies) {
+        return policies == null ? null : new EventPoliciesEmbeddable(
+                policies.ageRating(), policies.ageRatingDetails(), policies.halfPriceRules(), policies.validationRules());
+    }
+
+    private static EventPolicies toPolicies(EventPoliciesEmbeddable policies) {
+        return policies == null ? null : new EventPolicies(
+                policies.getAgeRating(), policies.getAgeRatingDetails(),
+                policies.getHalfPriceRules(), policies.getValidationRules());
     }
 }

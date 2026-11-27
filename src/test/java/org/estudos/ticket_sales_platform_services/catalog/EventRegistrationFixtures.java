@@ -2,6 +2,7 @@ package org.estudos.ticket_sales_platform_services.catalog;
 import org.estudos.ticket_sales_platform_services.catalog.adapter.in.dtos.events.RegisterEventRequestDTO;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.Address;
 import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.EventDomain;
+import org.estudos.ticket_sales_platform_services.catalog.application.core.domain.models.EventPolicies;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -11,6 +12,8 @@ public final class EventRegistrationFixtures {
     public static final OffsetDateTime STARTS_AT = OffsetDateTime.of(2099, 1, 10, 20, 0, 0, 0, ZoneOffset.of("-03:00"));
     public static final OffsetDateTime ENDS_AT = OffsetDateTime.of(2099, 1, 11, 2, 0, 0, 0, ZoneOffset.of("-03:00"));
     public static final OffsetDateTime PAST = OffsetDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    public static final EventPolicies POLICIES = new EventPolicies("16 anos", "Acompanhamento de responsavel",
+            "Meia-entrada", "Documento obrigatorio");
     private EventRegistrationFixtures() {
     }
     public static EventDomain validDraft() {
@@ -22,7 +25,8 @@ public final class EventRegistrationFixtures {
                 STARTS_AT,
                 ENDS_AT,
                 new Address("20000-000", "Av. das Nacoes", "1", "Rio de Janeiro", "Centro"),
-                "Teatro Rio"
+                "Teatro Rio",
+                POLICIES
         );
     }
     public static RegisterEventRequestDTO request(String neighborhood) {
@@ -40,7 +44,9 @@ public final class EventRegistrationFixtures {
                         "Rio de Janeiro",
                         neighborhood
                 ),
-                "Teatro Amaral"
+                "Teatro Amaral",
+                new RegisterEventRequestDTO.EventPoliciesRequestDTO(
+                        POLICIES.ageRating(), POLICIES.ageRatingDetails(), POLICIES.halfPriceRules(), POLICIES.validationRules())
         );
     }
 }
